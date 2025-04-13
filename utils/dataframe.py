@@ -1,7 +1,9 @@
 import pandas as pd
 
 from config import ROOT_DIR
+from utils.logger import get_logger
 
+logger = get_logger("utils.logger")
 
 def get_attached_dataset(start_year: int=1968,
                          end_year: int=2024) -> pd.DataFrame:
@@ -15,12 +17,16 @@ def get_attached_dataset(start_year: int=1968,
 
 def save_attached_dataset(start_year: int=1968,
                          end_year: int=2024) -> None:
+    save_path = f"{ROOT_DIR}/data/atp_matches_train.csv"
     try:
         attached_df = get_attached_dataset(start_year, end_year)
-        attached_df.to_csv(f"{ROOT_DIR}/data/atp_matches_train.csv")
+        attached_df.to_csv(save_path)
+        logger.info(f"Train dataset successfully saved to {save_path}")
 
     except Exception as save_error:
-        print(f"Error occurred while saving attached dataset -> {save_error}")
+        logger.error(
+            f"Error occurred while saving attached dataset -> {save_error}"
+        )
 
 
 if __name__ == '__main__':
