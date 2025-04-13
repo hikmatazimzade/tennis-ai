@@ -1,3 +1,4 @@
 .idea/
 myvenv/
 notes.txt
+__pycache__/
