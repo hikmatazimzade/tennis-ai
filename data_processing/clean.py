@@ -16,6 +16,7 @@ class CleanDf(ABC):
 
     def clean(self):
         self.drop_columns()
+        self.encode_tourney_date()
         self.apply_one_hot_encoding()
 
     def drop_columns(self, column_names: Tuple[str]=(
@@ -29,6 +30,16 @@ class CleanDf(ABC):
             except Exception as column_drop_error:
                 logger.error("An error occurred when "
                              f"dropping {column} -> {column_drop_error}")
+
+    def encode_tourney_date(self):
+        self.df["tourney_date"] = pd.to_datetime(self.df
+            ["tourney_date"].astype(str), format='%Y%m%d')
+
+        self.df['tourney_year'] = self.df['tourney_date'].dt.year
+        self.df['tourney_month'] = self.df['tourney_date'].dt.month
+        self.df['tourney_day'] = self.df['tourney_date'].dt.day
+
+        self.df.drop(columns=["tourney_date"], inplace=True)
 
     def apply_one_hot_encoding(self, column_names: Tuple[str]=(
         "surface", "tourney_level", "winner_entry", "winner_hand"
