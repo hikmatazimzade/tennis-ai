@@ -16,6 +16,7 @@ class CleanDf(ABC):
 
     def clean(self):
         self.drop_columns()
+        self.apply_one_hot_encoding()
 
     def drop_columns(self, column_names: Tuple[str]=(
         "tourney_name", "match_num", "winner_name", "loser_name",
@@ -29,9 +30,17 @@ class CleanDf(ABC):
                 logger.error("An error occurred when "
                              f"dropping {column} -> {column_drop_error}")
 
+    def apply_one_hot_encoding(self, column_names: Tuple[str]=(
+        "surface", "tourney_level", "winner_entry", "winner_hand"
+    )) -> None:
+        column_names = list(column_names)
+        self.df = pd.get_dummies(self.df, columns=column_names)
+        logger.info(f"Applied one-hot encoding to {column_names}")
+
 
 if __name__ == '__main__':
     clean_df = CleanDf()
     clean_df.clean()
 
     print(clean_df.df.info())
+    print(clean_df.df["tourney_year"].unique())
