@@ -36,7 +36,7 @@ class CleanDf(ABC):
                 logger.error("An error occurred when "
                              f"dropping {column} -> {column_drop_error}")
 
-    def encode_tourney_date(self):
+    def encode_tourney_date(self) -> None:
         self.df["tourney_date"] = pd.to_datetime(self.df
             ["tourney_date"].astype(str), format='%Y%m%d')
 
@@ -54,7 +54,7 @@ class CleanDf(ABC):
         self.df = pd.get_dummies(self.df, columns=column_names)
         logger.info(f"Applied one-hot encoding to {column_names}")
 
-    def replace_hands(self):
+    def replace_hands(self) -> None:
         self.df.fillna({"winner_hand": "R"}, inplace=True)
         self.df.fillna({"loser_hand": "R"}, inplace=True)
         self.df.replace({"winner_hand": {"U": "R"},
