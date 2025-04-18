@@ -20,6 +20,7 @@ class CleanDf(ABC):
         self.encode_tourney_date()
         self.apply_one_hot_encoding()
         self.handle_ambidextrous_hand()
+        self.handle_nan_seed_values()
         self.apply_non_linear_transformation()
         return self.df
 
@@ -76,9 +77,13 @@ class CleanDf(ABC):
         self.df["winner_seed"] = 1 / self.df["winner_seed"]
         self.df["loser_seed"] = 1 / self.df["loser_seed"]
 
+    @abstractmethod
+    def handle_nan_seed_values(self):
+        pass
+
 
 if __name__ == '__main__':
     clean_df = CleanDf()
     clean_df.clean()
 
-    print(clean_df.df.head())
+    print(clean_df.df.info())
