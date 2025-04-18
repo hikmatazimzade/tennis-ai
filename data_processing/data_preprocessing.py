@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Tuple
 
 import pandas as pd
-from matplotlib.cbook import print_cycles
 
 from config import ROOT_DIR
 from utils.logger import get_logger
@@ -12,15 +11,17 @@ logger = get_logger("data_processing.clean")
 
 
 class CleanDf(ABC):
-    def __init__(self):
-        self.df = pd.read_csv(TRAIN_CSV)
+    def __init__(self, train_csv: str=TRAIN_CSV):
+        self.df = pd.read_csv(train_csv)
 
-    def clean(self):
+    def clean(self) -> pd.DataFrame:
         self.replace_hands()
         self.drop_columns()
         self.encode_tourney_date()
         self.apply_one_hot_encoding()
         self.handle_ambidextrous_hand()
+        self.apply_non_linear_transformation()
+        return self.df
 
     def drop_columns(self, column_names: Tuple[str]=(
         "tourney_name", "match_num", "winner_name", "loser_name",
@@ -53,7 +54,6 @@ class CleanDf(ABC):
         logger.info(f"Applied one-hot encoding to {column_names}")
 
     def replace_hands(self):
-        print(self.df["winner_hand"].unique())
         self.df.fillna({"winner_hand": "R"}, inplace=True)
         self.df.fillna({"loser_hand": "R"}, inplace=True)
         self.df.replace({"winner_hand": {"U": "R"},
@@ -71,6 +71,10 @@ class CleanDf(ABC):
                 self.df.loc[condition, l_col] = True
 
         self.df.drop(columns=["winner_hand_A", "loser_hand_A"], inplace=True)
+
+    def apply_non_linear_transformation(self):
+        self.df["winner_seed"] = 1 / self.df["winner_seed"]
+        self.df["loser_seed"] = 1 / self.df["loser_seed"]
 
 
 if __name__ == '__main__':
