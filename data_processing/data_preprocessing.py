@@ -26,8 +26,11 @@ class CleanDf(ABC):
         return self.df
 
     def drop_columns(self, column_names: Tuple[str]=(
-        "tourney_name", "match_num", "winner_name", "loser_name",
-        "score", "best_of", "round", "minutes"
+        "tourney_name", "tourney_id", "match_num", "winner_name", "loser_name",
+        "score", "best_of", "round", "minutes", "w_ace", "l_ace", "w_df",
+        "l_df", "w_svpt", "l_svpt", "w_1stIn", "l_1stIn", "w_1stWon",
+        "l_1stWon", "w_2ndWon", "l_2ndWon", "w_SvGms", "l_SvGms", "w_bpSaved",
+        "l_bpSaved", "w_bpFaced", "l_bpFaced"
     )) -> None:
         for column in column_names:
             try:
