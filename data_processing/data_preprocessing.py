@@ -47,7 +47,7 @@ class CleanDf(ABC):
         self.df.drop(columns=["tourney_date"], inplace=True)
 
     def apply_one_hot_encoding(self, column_names: Tuple[str]=(
-        "surface", "tourney_level", "winner_entry",
+        "surface", "tourney_level", "winner_entry", "loser_entry",
                 "winner_hand", "loser_hand"
     )) -> None:
         column_names = list(column_names)
