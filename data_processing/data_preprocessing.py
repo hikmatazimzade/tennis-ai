@@ -21,7 +21,8 @@ class CleanDf(ABC):
         self.apply_one_hot_encoding()
         self.handle_ambidextrous_hand()
         self.handle_nan_seed_values()
-        self.apply_non_linear_transformation()
+        self.handle_seed_values()
+        self.handle_ranks()
         return self.df
 
     def drop_columns(self, column_names: Tuple[str]=(
@@ -73,13 +74,25 @@ class CleanDf(ABC):
 
         self.df.drop(columns=["winner_hand_A", "loser_hand_A"], inplace=True)
 
-    def apply_non_linear_transformation(self):
+    def handle_seed_values(self):
         self.df["winner_seed"] = 1 / self.df["winner_seed"]
         self.df["loser_seed"] = 1 / self.df["loser_seed"]
 
     @abstractmethod
     def handle_nan_seed_values(self):
         pass
+
+    def apply_clip(self, cap: int=3000, column_names: Tuple[str]=(
+        "winner_rank", "loser_rank"
+    )) -> None:
+        for column in column_names:
+            self.df[column] = self.df[column].clip(upper=cap)
+            self.df[column] = self.df[column].clip(upper=cap)
+
+    def handle_ranks(self) -> None:
+        self.apply_clip()
+        self.df["winner_rank"] = 1 / self.df["winner_rank"]
+        self.df["loser_rank"] = 1 / self.df["loser_rank"]
 
 
 if __name__ == '__main__':
