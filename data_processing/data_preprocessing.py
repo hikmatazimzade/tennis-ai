@@ -96,7 +96,11 @@ class CleanDf(ABC):
 
 
 if __name__ == '__main__':
-    clean_df = CleanDf()
+    class DummyCleaner(CleanDf):
+        def handle_nan_seed_values(self):
+            pass
+
+    clean_df = DummyCleaner()
     clean_df.clean()
 
     print(clean_df.df.info())
