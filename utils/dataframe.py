@@ -19,6 +19,10 @@ def get_shuffled_dataframe(df: DataFrame) -> DataFrame:
     remaining_data = get_df_list_by_col_names(df, remaining_cols)
 
     remaining_cols.append("player_1_won")
+    winner_cols = [w.replace("winner_", "player_1_") for w in winner_cols]
+    loser_cols = [l.replace("loser_", "player_2_") for l in loser_cols]
+
+
     col_names = winner_cols + loser_cols + remaining_cols
 
     players_data = get_players_data(winner_data, loser_data, remaining_data,
@@ -75,3 +79,4 @@ if __name__ == '__main__':
 
     df = cleaner.df
     shuffled_df = get_shuffled_dataframe(df)
+    print(shuffled_df.info())
