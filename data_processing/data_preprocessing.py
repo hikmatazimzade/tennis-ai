@@ -102,7 +102,7 @@ class CleanDf(ABC):
         before = len(self.df)
         self.df.dropna(inplace=True)
         after = len(self.df)
-        logger.info(f"{after - before} rows dropped")
+        logger.info(f"{before - after} rows dropped")
 
 
 if __name__ == '__main__':
