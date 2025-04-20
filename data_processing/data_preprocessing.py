@@ -24,6 +24,7 @@ class CleanDf(ABC):
         self.handle_seed_values()
         self.handle_ranks()
         self.drop_all_remaining_nans() # TODO: Modify it for tree-based models
+        self.handle_winner_loser_ioc_values()
         return self.df
 
     def drop_columns(self, column_names: Tuple[str]=(
@@ -84,6 +85,10 @@ class CleanDf(ABC):
 
     @abstractmethod
     def handle_nan_seed_values(self):
+        pass
+
+    @abstractmethod
+    def handle_winner_loser_ioc_values(self):
         pass
 
     def apply_clip(self, cap: int=3000, column_names: Tuple[str]=(
