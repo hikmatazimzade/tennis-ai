@@ -31,7 +31,7 @@ class CleanDf(ABC):
         "score", "best_of", "round", "minutes", "w_ace", "l_ace", "w_df",
         "l_df", "w_svpt", "l_svpt", "w_1stIn", "l_1stIn", "w_1stWon",
         "l_1stWon", "w_2ndWon", "l_2ndWon", "w_SvGms", "l_SvGms", "w_bpSaved",
-        "l_bpSaved", "w_bpFaced", "l_bpFaced"
+        "l_bpSaved", "w_bpFaced", "l_bpFaced", "Unnamed: 0"
     )) -> None:
         for column in column_names:
             try:
