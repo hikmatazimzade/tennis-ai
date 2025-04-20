@@ -23,6 +23,7 @@ class CleanDf(ABC):
         self.handle_nan_seed_values()
         self.handle_seed_values()
         self.handle_ranks()
+        self.drop_all_remaining_nans() # TODO: Modify it for tree-based models
         return self.df
 
     def drop_columns(self, column_names: Tuple[str]=(
@@ -96,6 +97,12 @@ class CleanDf(ABC):
         self.apply_clip()
         self.df["winner_rank"] = 1 / self.df["winner_rank"]
         self.df["loser_rank"] = 1 / self.df["loser_rank"]
+
+    def drop_all_remaining_nans(self) -> None:
+        before = len(self.df)
+        self.df.dropna(inplace=True)
+        after = len(self.df)
+        logger.info(f"{after - before} rows dropped")
 
 
 if __name__ == '__main__':
