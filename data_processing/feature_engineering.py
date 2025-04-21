@@ -57,6 +57,7 @@ class FeatureEngineeringDf(ABC):
         self.add_rank_points_diff()
         self.add_height_diff()
         self.add_elo()
+        self.add_elo_diff()
         return self.df
 
     def add_rank_diff(self) -> None:
@@ -79,6 +80,10 @@ class FeatureEngineeringDf(ABC):
         player_1_elos, player_2_elos = get_elos(self.df, K)
         self.df["player_1_elo"] = player_1_elos
         self.df["player_2_elo"] = player_2_elos
+
+    def add_elo_diff(self) -> None:
+        self.df["elo_diff"] = (self.df["player_1_elo"]
+                - self.df["player_2_elo"])
 
 
 if __name__ == '__main__':
