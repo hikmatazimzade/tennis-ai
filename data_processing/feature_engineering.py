@@ -15,6 +15,7 @@ class FeatureEngineeringDf(ABC):
     def apply_feature_engineering(self) -> pd.DataFrame:
         self.add_rank_diff()
         self.add_rank_points_diff()
+        self.add_height_diff()
         return self.df
 
     def add_rank_diff(self) -> None:
@@ -24,6 +25,14 @@ class FeatureEngineeringDf(ABC):
     def add_rank_points_diff(self) -> None:
         self.df["rank_points_diff"] = (self.df["player_1_rank_points"]
                                        - self.df["player_1_rank_points"])
+
+    def add_age_diff(self) -> None:
+        self.df["age_diff"] = (self.df["player_1_age"]
+                               - self.df["player_2_age"])
+
+    def add_height_diff(self) -> None:
+        self.df["height_diff"] = (self.df["player_1_ht"]
+                                  - self.df["player_2_ht"])
 
 
 if __name__ == '__main__':
