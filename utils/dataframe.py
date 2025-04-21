@@ -1,7 +1,6 @@
 from typing import List
 from random import randint
 
-import pandas as pd
 from pandas import DataFrame
 
 from utils.logger import get_logger
@@ -52,7 +51,7 @@ def get_players_data(winner_data: list, loser_data: list,
     logger.info(f"{one} winners assigned to player 1")
     logger.info(f"{zero} winners assigned to player 2")
 
-    return pd.DataFrame(new_list, columns=col_names)
+    return DataFrame(new_list, columns=col_names)
 
 
 def get_df_list_by_col_names(df: DataFrame, column_names: list) -> List[list]:
