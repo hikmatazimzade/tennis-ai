@@ -1,11 +1,51 @@
 from abc import ABC, abstractmethod
-from typing import Tuple
+from typing import Tuple, List
+from collections import defaultdict
 
 import pandas as pd
 
 from utils.logger import get_logger
 
 logger = get_logger("data_processing.feature_engineering")
+
+
+def get_elos(df: pd.DataFrame, K:int) -> Tuple[list, list]:
+    elo_rating = defaultdict(lambda: 1500)
+    player_1_elos = []
+    player_2_elos = []
+
+    for _, row in df.iterrows():
+        player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
+        player_1_won = row["player_1_won"]
+
+        append_elos(player_1_elos, player_2_elos, player_1_id,
+                    player_2_id, elo_rating)
+        update_elo(elo_rating, player_1_won, K, player_1_id, player_2_id)
+
+    return player_1_elos, player_2_elos
+
+
+def update_elo(elo_rating: dict, player_1_won: bool, K: int, player_1_id: int,
+               player_2_id: int) -> None:
+    actual_score_1 = 1 if player_1_won else 0
+    actual_score_2 = 1 - actual_score_1
+
+    expected_score_1 = get_expected_score(elo_rating[player_1_id],
+                                          elo_rating[player_2_id])
+    expected_score_2 = 1 - expected_score_1
+
+    elo_rating[player_1_id] += K * (actual_score_1 - expected_score_1)
+    elo_rating[player_2_id] += K * (actual_score_2 - expected_score_2)
+
+
+def get_expected_score(player_1_elo: float, player_2_elo: float) -> float:
+    return 1 / (1 + 10 ** ((player_2_elo - player_1_elo) / 400))
+
+
+def append_elos(player_1_elos: list, player_2_elos: list, player_1_id: int,
+                player_2_id: int, elo_rating) -> None:
+    player_1_elos.append(elo_rating[player_1_id])
+    player_2_elos.append(elo_rating[player_2_id])
 
 
 class FeatureEngineeringDf(ABC):
@@ -16,6 +56,7 @@ class FeatureEngineeringDf(ABC):
         self.add_rank_diff()
         self.add_rank_points_diff()
         self.add_height_diff()
+        self.add_elo()
         return self.df
 
     def add_rank_diff(self) -> None:
@@ -33,6 +74,11 @@ class FeatureEngineeringDf(ABC):
     def add_height_diff(self) -> None:
         self.df["height_diff"] = (self.df["player_1_ht"]
                                   - self.df["player_2_ht"])
+
+    def add_elo(self, K: int=75) -> None:
+        player_1_elos, player_2_elos = get_elos(self.df, K)
+        self.df["player_1_elo"] = player_1_elos
+        self.df["player_2_elo"] = player_2_elos
 
 
 if __name__ == '__main__':
