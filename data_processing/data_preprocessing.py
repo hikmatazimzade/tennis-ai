@@ -7,7 +7,7 @@ from config import ROOT_DIR
 from utils.logger import get_logger
 
 TRAIN_CSV = f"{ROOT_DIR}/data/atp_matches_train.csv"
-logger = get_logger("data_processing.clean")
+logger = get_logger("data_processing.data_preprocessing")
 
 
 class CleanDf(ABC):
