@@ -4,8 +4,25 @@ from random import randint
 from pandas import DataFrame
 
 from utils.logger import get_logger
+from training.random_forest import CleanRandomForestDf
+from data_processing.feature_engineering import FeatureEngineeringDf
 
 logger = get_logger("utils.dataframe")
+
+
+def get_final_dataframe(model: str) -> DataFrame:
+    if model == "random_forest":
+        cleaner = CleanRandomForestDf()
+    cleaner.clean()
+
+    df = cleaner.df
+    shuffled_df = get_shuffled_dataframe(df)
+
+    feature_engineering = FeatureEngineeringDf(shuffled_df)
+    feature_engineering.apply_feature_engineering()
+
+    df = feature_engineering.df
+    return df
 
 
 def get_shuffled_dataframe(df: DataFrame) -> DataFrame:
@@ -72,7 +89,6 @@ def get_remaining_cols(df: DataFrame) -> List[str]:
 
 
 if __name__ == '__main__':
-    from training.random_forest import CleanRandomForestDf
     cleaner = CleanRandomForestDf()
     cleaner.clean()
 
