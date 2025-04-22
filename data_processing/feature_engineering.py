@@ -77,6 +77,8 @@ class FeatureEngineeringDf(ABC):
                                   - self.df["player_2_ht"])
 
     def add_elo(self, K: int=75) -> None:
+        self.df = self.df.sort_values(["tourney_year", "tourney_month",
+                                       "tourney_day"])
         player_1_elos, player_2_elos = get_elos(self.df, K)
         self.df["player_1_elo"] = player_1_elos
         self.df["player_2_elo"] = player_2_elos
