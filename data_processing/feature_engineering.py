@@ -56,6 +56,7 @@ class FeatureEngineeringDf(ABC):
         self.add_rank_diff()
         self.add_rank_points_diff()
         self.add_height_diff()
+
         self.add_elo()
         self.add_elo_diff()
         return self.df
@@ -80,6 +81,7 @@ class FeatureEngineeringDf(ABC):
         self.df = self.df.sort_values(["tourney_year", "tourney_month",
                                        "tourney_day"])
         player_1_elos, player_2_elos = get_elos(self.df, K)
+
         self.df["player_1_elo"] = player_1_elos
         self.df["player_2_elo"] = player_2_elos
 
