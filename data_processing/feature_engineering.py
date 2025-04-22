@@ -67,7 +67,7 @@ class FeatureEngineeringDf(ABC):
 
     def add_rank_points_diff(self) -> None:
         self.df["rank_points_diff"] = (self.df["player_1_rank_points"]
-                                       - self.df["player_1_rank_points"])
+                                       - self.df["player_2_rank_points"])
 
     def add_age_diff(self) -> None:
         self.df["age_diff"] = (self.df["player_1_age"]
