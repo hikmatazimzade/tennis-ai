@@ -50,7 +50,8 @@ def append_elos(player_1_elos: list, player_2_elos: list, player_1_id: int,
 
 class FeatureEngineeringDf(ABC):
     def __init__(self, df: pd.DataFrame):
-        self.df = df
+        self.df = df.sort_values(["tourney_year", "tourney_month",
+                                       "tourney_day"])
 
     def apply_feature_engineering(self) -> pd.DataFrame:
         self.add_rank_diff()
