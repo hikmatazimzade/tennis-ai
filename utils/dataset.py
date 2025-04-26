@@ -1,8 +1,4 @@
-from typing import List
-from random import randint
-
 import pandas as pd
-from pandas import DataFrame
 
 from config import ROOT_DIR
 from utils.logger import get_logger
