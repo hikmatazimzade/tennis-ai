@@ -34,13 +34,16 @@ class CleanDf(ABC):
         "l_1stWon", "w_2ndWon", "l_2ndWon", "w_SvGms", "l_SvGms", "w_bpSaved",
         "l_bpSaved", "w_bpFaced", "l_bpFaced", "Unnamed: 0"
     )) -> None:
+        dropped_columns = []
         for column in column_names:
             try:
                 self.df.drop(column, axis=1, inplace=True)
-                logger.info(f"{column} column successfully dropped")
+                dropped_columns.append(column)
             except Exception as column_drop_error:
                 logger.error("An error occurred when "
                              f"dropping {column} -> {column_drop_error}")
+
+        logger.info(f"Columns successfully dropped -> {dropped_columns}")
 
     def encode_tourney_date(self) -> None:
         self.df["tourney_date"] = pd.to_datetime(self.df
