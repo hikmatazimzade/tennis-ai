@@ -16,7 +16,7 @@ def get_final_dataframe(model: str) -> DataFrame:
     cleaner.clean()
 
     df = cleaner.df
-    shuffled_df = get_shuffled_dataframe(df)
+    shuffled_df = shuffle_winner_loser_data(df)
 
     feature_engineering = FeatureEngineeringDf(shuffled_df)
     feature_engineering.apply_feature_engineering()
@@ -25,7 +25,7 @@ def get_final_dataframe(model: str) -> DataFrame:
     return df
 
 
-def get_shuffled_dataframe(df: DataFrame) -> DataFrame:
+def shuffle_winner_loser_data(df: DataFrame) -> DataFrame:
     winner_cols = get_winner_cols(df)
     loser_cols = get_loser_cols(df)
     remaining_cols = get_remaining_cols(df)
@@ -93,5 +93,5 @@ if __name__ == '__main__':
     cleaner.clean()
 
     df = cleaner.df
-    shuffled_df = get_shuffled_dataframe(df)
+    shuffled_df = shuffle_winner_loser_data(df)
     print(shuffled_df.info())

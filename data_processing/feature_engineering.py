@@ -93,13 +93,13 @@ class FeatureEngineeringDf(ABC):
 
 if __name__ == '__main__':
     from training.random_forest import CleanRandomForestDf
-    from utils.dataframe import get_shuffled_dataframe
+    from utils.dataframe import shuffle_winner_loser_data
 
     cleaner = CleanRandomForestDf()
     cleaner.clean()
 
     df = cleaner.df
-    shuffled_df = get_shuffled_dataframe(df)
+    shuffled_df = shuffle_winner_loser_data(df)
 
     feature_engineering = FeatureEngineeringDf(shuffled_df)
     feature_engineering.apply_feature_engineering()
