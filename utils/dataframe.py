@@ -1,5 +1,5 @@
 from typing import List
-from random import randint
+from secrets import choice
 
 from pandas import DataFrame
 
@@ -14,14 +14,11 @@ def get_final_dataframe(model: str) -> DataFrame:
     if model == "random_forest":
         cleaner = CleanRandomForestDf()
     cleaner.clean()
+    df = shuffle_winner_loser_data(cleaner.df)
 
-    df = cleaner.df
-    shuffled_df = shuffle_winner_loser_data(df)
+    feature_engineering = FeatureEngineeringDf(df)
+    # df = feature_engineering.apply_feature_engineering()
 
-    feature_engineering = FeatureEngineeringDf(shuffled_df)
-    feature_engineering.apply_feature_engineering()
-
-    df = feature_engineering.df
     return df
 
 
@@ -54,7 +51,7 @@ def get_players_data(winner_data: list, loser_data: list,
     for winner, loser, remaining in zip(
             winner_data, loser_data, remaining_data
     ):
-        random_win = bool(randint(0, 1))
+        random_win = bool(choice(range(0, 2)))
         remaining.append(random_win)
 
         if random_win:
@@ -89,9 +86,5 @@ def get_remaining_cols(df: DataFrame) -> List[str]:
 
 
 if __name__ == '__main__':
-    cleaner = CleanRandomForestDf()
-    cleaner.clean()
-
-    df = cleaner.df
-    shuffled_df = shuffle_winner_loser_data(df)
-    print(shuffled_df.info())
+    df = get_final_dataframe("random_forest")
+    print(df.columns)

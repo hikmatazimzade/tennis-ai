@@ -54,6 +54,8 @@ class FeatureEngineeringDf(ABC):
                                        "tourney_day"])
 
     def apply_feature_engineering(self) -> pd.DataFrame:
+        logger.info("Applying feature engineering")
+
         self.add_rank_diff()
         self.add_rank_points_diff()
         self.add_height_diff()
