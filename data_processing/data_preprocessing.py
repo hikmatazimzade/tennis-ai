@@ -114,11 +114,7 @@ class CleanDf(ABC):
 
 
 if __name__ == '__main__':
-    class DummyCleaner(CleanDf):
-        def handle_nan_seed_values(self):
-            pass
+    from training.random_forest import CleanRandomForestDf
 
-    clean_df = DummyCleaner()
-    clean_df.clean()
-
-    print(clean_df.df.info())
+    clean_df = CleanRandomForestDf().clean()
+    print(clean_df.info())
