@@ -21,7 +21,7 @@ def get_final_dataframe(model: str) -> DataFrame:
     df = shuffle_winner_loser_data(cleaner.df)
 
     feature_engineering = FeatureEngineeringDf(df)
-    # df = feature_engineering.apply_feature_engineering()
+    df = feature_engineering.apply_feature_engineering()
 
     return df
 
