@@ -16,9 +16,9 @@ class CleanDf(ABC):
 
     def clean(self) -> pd.DataFrame:
         self.replace_hands()
-        self.drop_columns()
         self.encode_tourney_date()
         self.apply_one_hot_encoding()
+        self.drop_columns()
         self.handle_ambidextrous_hand()
         self.handle_nan_seed_values()
         self.handle_seed_values()
@@ -32,7 +32,7 @@ class CleanDf(ABC):
         "score", "best_of", "round", "minutes", "w_ace", "l_ace", "w_df",
         "l_df", "w_svpt", "l_svpt", "w_1stIn", "l_1stIn", "w_1stWon",
         "l_1stWon", "w_2ndWon", "l_2ndWon", "w_SvGms", "l_SvGms", "w_bpSaved",
-        "l_bpSaved", "w_bpFaced", "l_bpFaced", "Unnamed: 0"
+        "l_bpSaved", "w_bpFaced", "l_bpFaced", "Unnamed: 0", "loser_entry_S"
     )) -> None:
         dropped_columns = []
         for column in column_names:
