@@ -60,6 +60,7 @@ class FeatureEngineeringDf(ABC):
         self.add_rank_points_diff()
         self.add_height_diff()
 
+        self.add_age_diff()
         self.add_elo()
         self.add_elo_diff()
         return self.df
