@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from secrets import choice
 
 from pandas import DataFrame
@@ -10,9 +10,13 @@ from data_processing.feature_engineering import FeatureEngineeringDf
 logger = get_logger("utils.dataframe")
 
 
-def get_final_dataframe(model: str) -> DataFrame:
+def get_cleaner(model: str) -> Union[CleanRandomForestDf]:
     if model == "random_forest":
-        cleaner = CleanRandomForestDf()
+        return CleanRandomForestDf()
+
+
+def get_final_dataframe(model: str) -> DataFrame:
+    cleaner = get_cleaner(model)
     cleaner.clean()
     df = shuffle_winner_loser_data(cleaner.df)
 
