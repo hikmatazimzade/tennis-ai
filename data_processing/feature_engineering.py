@@ -60,6 +60,13 @@ class FeatureEngineeringDf(ABC):
         self.add_rank_points_diff()
         self.add_height_diff()
 
+        self.create_total_match()
+        self.create_won_match()
+        self.create_last_won_10_matches()
+        self.fill_total_won_match_data()
+        self.add_total_match_diff()
+        self.add_won_match_diff()
+
         self.add_age_diff()
         self.add_elo()
         self.add_elo_diff()
@@ -80,6 +87,57 @@ class FeatureEngineeringDf(ABC):
     def add_height_diff(self) -> None:
         self.df["height_diff"] = (self.df["player_1_ht"]
                                   - self.df["player_2_ht"])
+
+    def create_total_match(self) -> None:
+        self.df["player_1_total_match"] = 0
+        self.df["player_2_total_match"] = 0
+
+    def create_won_match(self) -> None:
+        self.df["player_1_won_match"] = 0
+        self.df["player_2_won_match"] = 0
+
+    def create_last_won_10_matches(self) -> None:
+        self.df["player_1_last_10_won"] = 0
+        self.df["player_2_last_10_won"] = 0
+
+    def add_total_match_diff(self) -> None:
+        self.df["total_match_diff"] = (self.df["player_1_total_match"]
+                                - self.df["player_2_total_match"])
+
+    def add_won_match_diff(self) -> None:
+        self.df["won_match_diff"] = (self.df["player_1_won_match"]
+                                - self.df["player_2_won_match"])
+
+    def fill_total_won_match_data(self) -> defaultdict:
+        match_dt = defaultdict(lambda: [0, 0, 0]) # index 0 won, 1 total # 2 last_10_matches
+
+        for idx, row in self.df.iterrows():
+            player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
+            player_1_won = row["player_1_won"]
+
+            self.df.at[idx, "player_1_won_match"] = match_dt[player_1_id][0]
+            self.df.at[idx, "player_2_won_match"] = match_dt[player_2_id][0]
+
+            self.df.at[idx, "player_1_total_match"] = match_dt[player_1_id][1]
+            self.df.at[idx, "player_2_total_match"] = match_dt[player_2_id][1]
+
+            self.df.at[idx, "player_1_last_10_won"] = match_dt[player_1_id][2]
+            self.df.at[idx, "player_2_last_10_won"] = match_dt[player_2_id][2]
+
+            if player_1_won:
+                match_dt[player_1_id][0] += 1
+                match_dt[player_1_id][2] = min(match_dt[player_1_id][2] + 1, 10)
+                match_dt[player_2_id][2] = max(match_dt[player_2_id][2] - 1, 0)
+
+            else:
+                match_dt[player_2_id][0] += 1
+                match_dt[player_2_id][2] = min(match_dt[player_2_id][2] + 1, 10)
+                match_dt[player_2_id][2] = max(match_dt[player_2_id][2] - 1, 0)
+
+            match_dt[player_1_id][1] += 1
+            match_dt[player_2_id][1] += 1
+
+        return match_dt
 
     def add_elo(self, K: int=75) -> None:
         self.df = self.df.sort_values(["tourney_year", "tourney_month",
