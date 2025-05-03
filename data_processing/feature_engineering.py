@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Tuple, List
 from collections import defaultdict
 
+import numpy as np
 import pandas as pd
 
 from utils.logger import get_logger
@@ -49,16 +50,17 @@ def append_elos(player_1_elos: list, player_2_elos: list, player_1_id: int,
 
 
 def update_match_dict(match_dt: defaultdict, player_1_won: bool,
-                      player_1_id: int, player_2_id: int) -> None:
+                      player_1_id: int, player_2_id: int,
+                      last_n_matches: tuple) -> None:
     if player_1_won:
         match_dt[player_1_id][0] += 1
-        for i, num in enumerate([5, 10, 20, 50], start=2):
+        for i, num in enumerate(last_n_matches, start=2):
             match_dt[player_1_id][i] = min(match_dt[player_1_id][i] + 1, num)
             match_dt[player_2_id][i] = max(match_dt[player_2_id][i] - 1, 0)
 
     else:
         match_dt[player_2_id][0] += 1
-        for i, num in enumerate([5, 10, 20, 50], start=2):
+        for i, num in enumerate(last_n_matches, start=2):
             match_dt[player_2_id][i] = min(match_dt[player_2_id][i] + 1, num)
             match_dt[player_2_id][i] = max(match_dt[player_2_id][i] - 1, 0)
 
@@ -70,6 +72,7 @@ class FeatureEngineeringDf(ABC):
     def __init__(self, df: pd.DataFrame):
         self.df = df.sort_values(["tourney_year", "tourney_month",
                                        "tourney_day"])
+        self.last_n_matches = (5, 10, 20, 50)
 
     def apply_feature_engineering(self) -> pd.DataFrame:
         logger.info("Applying feature engineering")
@@ -90,6 +93,9 @@ class FeatureEngineeringDf(ABC):
         self.add_total_match_diff()
         self.add_won_match_diff()
         self.add_last_won_match_diff()
+
+        self.add_win_ratio()
+        self.add_last_matches_win_ratio()
 
         self.add_age_diff()
         self.add_elo()
@@ -126,7 +132,7 @@ class FeatureEngineeringDf(ABC):
         self.df["player_2_won_match"] = 0
 
     def create_last_won_matches(self) -> None:
-        for num in (5, 10, 20, 50):
+        for num in self.last_n_matches:
             self.df[f"player_1_last_{num}_won"] = 0
             self.df[f"player_2_last_{num}_won"] = 0
 
@@ -147,6 +153,30 @@ class FeatureEngineeringDf(ABC):
     def add_head_to_head_diff(self) -> None:
         self.df["h2h_diff"] = (self.df["player_1_h2h_won"]
                        - self.df["player_2_h2h_won"])
+
+    def add_win_ratio(self) -> None:
+        self.df["player_1_win_ratio"] = np.where(
+            self.df["player_1_total_match"] == 0,
+            0,
+            self.df["player_1_won_match"] / self.df["player_1_total_match"]
+        )
+
+        self.df["player_2_win_ratio"] = np.where(
+            self.df["player_2_total_match"] == 0,
+            0,
+            self.df["player_2_won_match"] / self.df["player_2_total_match"]
+        )
+
+
+    def add_last_matches_win_ratio(self) -> None:
+        for num in self.last_n_matches:
+            self.df[f"player_1_last_{num}_win_ratio"] = (
+                    self.df[f"player_1_last_{num}_won"] / num
+            )
+
+            self.df[f"player_2_last_{num}_win_ratio"] = (
+                    self.df[f"player_2_last_{num}_won"] / num
+            )
 
     def fill_head_to_head_won(self) -> defaultdict:
         h2h_dict = defaultdict(lambda: [0, 0])
@@ -172,7 +202,7 @@ class FeatureEngineeringDf(ABC):
 
     def fill_total_won_match_data(self) -> defaultdict:
         match_dt = defaultdict(lambda: [0, 0, 0, 0, 0, 0])
-        # index 0 won, 1 total # then last_n_matches results
+        # index 0 won, 1 total, then last_n_matches results
 
         for idx, row in self.df.iterrows():
             player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
@@ -184,7 +214,7 @@ class FeatureEngineeringDf(ABC):
             self.df.at[idx, "player_1_total_match"] = match_dt[player_1_id][1]
             self.df.at[idx, "player_2_total_match"] = match_dt[player_2_id][1]
 
-            for i, num in enumerate([5, 10, 20, 50], start=2):
+            for i, num in enumerate(self.last_n_matches, start=2):
                 self.df.at[idx, f"player_1_last_{num}_won"] = (
                                                     match_dt[player_1_id][i])
 
@@ -192,7 +222,8 @@ class FeatureEngineeringDf(ABC):
                                                     match_dt[player_2_id][i])
 
             update_match_dict(match_dt, player_1_won,
-                              player_1_id, player_2_id)
+                              player_1_id, player_2_id,
+                              self.last_n_matches)
 
         return match_dt
 
