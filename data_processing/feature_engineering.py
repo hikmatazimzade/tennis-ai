@@ -210,7 +210,7 @@ class FeatureEngineeringDf(ABC):
 
 
 if __name__ == '__main__':
-    from training.random_forest import CleanRandomForestDf
+    from data_processing.random_forest import CleanRandomForestDf
     from utils.dataframe import shuffle_winner_loser_data
 
     cleaner = CleanRandomForestDf()

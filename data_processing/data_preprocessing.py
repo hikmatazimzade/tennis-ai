@@ -114,7 +114,7 @@ class CleanDf(ABC):
 
 
 if __name__ == '__main__':
-    from training.random_forest import CleanRandomForestDf
+    from data_processing.random_forest import CleanRandomForestDf
 
     clean_df = CleanRandomForestDf().clean()
     print(clean_df.info())

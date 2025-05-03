@@ -4,7 +4,7 @@ from secrets import choice
 from pandas import DataFrame
 
 from utils.logger import get_logger
-from training.random_forest import CleanRandomForestDf
+from data_processing.random_forest import CleanRandomForestDf
 from data_processing.feature_engineering import FeatureEngineeringDf
 
 logger = get_logger("utils.dataframe")

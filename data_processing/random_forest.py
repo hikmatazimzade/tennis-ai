@@ -4,7 +4,7 @@ from data_processing.data_preprocessing import CleanDf
 
 from utils.logger import get_logger
 
-logger = get_logger("training.random_forest")
+logger = get_logger("data_processing.random_forest")
 
 
 class CleanRandomForestDf(CleanDf):
