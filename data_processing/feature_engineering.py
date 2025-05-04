@@ -26,6 +26,56 @@ def get_elos(df: pd.DataFrame, K:int) -> Tuple[list, list]:
     return player_1_elos, player_2_elos
 
 
+def get_surface_index(carpet: bool, clay: bool, grass: bool) -> int:
+    if carpet: surface_idx = 0
+    if clay: surface_idx = 1
+    if grass: surface_idx = 2
+    else: surface_idx = 3
+    return surface_idx
+
+
+def append_surface_elos(player_1_elos: list, player_2_elos: list, player_1_id: int,
+                player_2_id: int, elo_rating, surface_idx: int) -> None:
+    player_1_elos.append(elo_rating[player_1_id][surface_idx])
+    player_2_elos.append(elo_rating[player_2_id][surface_idx])
+
+
+def update_surface_elo(elo_rating: dict, player_1_won: bool, K: int,
+            player_1_id: int, player_2_id: int, surface_idx: int) -> None:
+    actual_score_1 = 1 if player_1_won else 0
+    actual_score_2 = 1 - actual_score_1
+
+    expected_score_1 = get_expected_score(elo_rating[player_1_id][surface_idx],
+                                          elo_rating[player_2_id][surface_idx])
+    expected_score_2 = 1 - expected_score_1
+
+    elo_rating[player_1_id][surface_idx] += K * (actual_score_1 - expected_score_1)
+    elo_rating[player_2_id][surface_idx] += K * (actual_score_2 - expected_score_2)
+
+
+def get_surface_elos(df: pd.DataFrame, K: int) -> Tuple[list, list]:
+    elo_rating = defaultdict(lambda: [1500, 1500, 1500, 1500])
+    # carpet, clay, grass, hard
+
+    player_1_elos = []
+    player_2_elos = []
+
+    for _, row in df.iterrows():
+        carpet, clay = row["surface_Carpet"], row["surface_Clay"]
+        grass, hard = row["surface_Grass"], row["surface_Hard"]
+        surface_idx = get_surface_index(carpet, clay, grass)
+
+        player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
+        player_1_won = row["player_1_won"]
+
+        append_surface_elos(player_1_elos, player_2_elos, player_1_id,
+                    player_2_id, elo_rating, surface_idx)
+        update_surface_elo(elo_rating, player_1_won, K, player_1_id,
+                           player_2_id, surface_idx)
+
+    return player_1_elos, player_2_elos
+
+
 def update_elo(elo_rating: dict, player_1_won: bool, K: int, player_1_id: int,
                player_2_id: int) -> None:
     actual_score_1 = 1 if player_1_won else 0
@@ -100,6 +150,10 @@ class FeatureEngineeringDf(ABC):
         self.add_age_diff()
         self.add_elo()
         self.add_elo_diff()
+
+        self.add_surface_elo()
+        self.add_surface_elo_diff()
+
         return self.df
 
     def add_rank_diff(self) -> None:
@@ -236,6 +290,18 @@ class FeatureEngineeringDf(ABC):
     def add_elo_diff(self) -> None:
         self.df["elo_diff"] = (self.df["player_1_elo"]
                 - self.df["player_2_elo"])
+
+    def add_surface_elo(self, K:int=75) -> None:
+        player_1_elos, player_2_elos = get_surface_elos(self.df, K)
+
+        self.df["player_1_surface_elo"] = player_1_elos
+        self.df["player_2_surface_elo"] = player_2_elos
+
+    def add_surface_elo_diff(self) -> None:
+        self.df["surface_elo_diff"] = (
+            self.df["player_1_surface_elo"]
+            - self.df["player_2_surface_elo"]
+        )
 
 
 if __name__ == '__main__':
