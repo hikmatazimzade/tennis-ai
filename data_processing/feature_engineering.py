@@ -128,9 +128,6 @@ class FeatureEngineeringBase(ABC):
 
 
 class RankEngineering(FeatureEngineeringBase):
-    def __init__(self, df: pd.DataFrame):
-        super().__init__(df)
-
     def apply_feature_engineering(self) -> pd.DataFrame:
         self.add_rank_feature_differences()
         return self.df
@@ -149,9 +146,6 @@ class RankEngineering(FeatureEngineeringBase):
 
 
 class PhysicalEngineering(FeatureEngineeringBase):
-    def __init__(self, df: pd.DataFrame):
-        super().__init__(df)
-
     def apply_feature_engineering(self) -> pd.DataFrame:
         self.add_player_physical_features()
         return self.df
@@ -197,6 +191,48 @@ class CreateMatchFeatures(FeatureEngineeringBase):
             self.df[f"player_2_last_{num}_won"] = 0
 
 
+class HeadToHeadEngineering(FeatureEngineeringBase):
+    def apply_feature_engineering(self) -> pd.DataFrame:
+        self.add_head_to_head_features()
+        return self.df
+
+    def add_head_to_head_features(self) -> None:
+        self.create_head_to_head()
+        self.fill_head_to_head_won()
+        self.add_head_to_head_diff()
+
+    def create_head_to_head(self) -> None:
+        self.df["player_1_h2h_won"] = 0
+        self.df["player_2_h2h_won"] = 0
+        self.df["h2h_diff"] = 0
+
+    def fill_head_to_head_won(self) -> defaultdict:
+        h2h_dict = defaultdict(lambda: [0, 0])
+        for idx, row in self.df.iterrows():
+            player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
+            player_1_won = row["player_1_won"]
+
+            if (player_2_id, player_1_id) in h2h_dict:
+                key = (player_2_id, player_1_id)
+                first, second = 1, 0
+
+            else:
+                key = (player_1_id, player_2_id)
+                first, second = 0, 1
+
+            self.df.at[idx, "player_1_h2h_won"] = h2h_dict[key][first]
+            self.df.at[idx, "player_2_h2h_won"] = h2h_dict[key][second]
+
+            if player_1_won: h2h_dict[key][first] += 1
+            else: h2h_dict[key][second] += 1
+
+        return h2h_dict
+
+    def add_head_to_head_diff(self) -> None:
+        self.df["h2h_diff"] = (self.df["player_1_h2h_won"]
+                       - self.df["player_2_h2h_won"])
+
+
 class FeatureEngineeringDf(FeatureEngineeringBase):
     def __init__(self, df: pd.DataFrame):
         super().__init__(df)
@@ -213,7 +249,7 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
         self.df = (CreateMatchFeatures(self.df, self.last_n_matches).
                    apply_feature_engineering())
 
-        self.add_head_to_head_features()
+        self.df = HeadToHeadEngineering(self.df).apply_feature_engineering()
 
         self.fill_total_won_match_data()
         self.add_match_feature_differences()
@@ -222,11 +258,6 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
         self.add_elo_features()
 
         return self.df
-
-    def add_head_to_head_features(self) -> None:
-        self.create_head_to_head()
-        self.fill_head_to_head_won()
-        self.add_head_to_head_diff()
 
     def add_win_ratio_features(self) -> None:
         self.add_win_ratio()
@@ -244,11 +275,6 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
         self.add_won_match_diff()
         self.add_last_won_match_diff()
 
-    def create_head_to_head(self) -> None:
-        self.df["player_1_h2h_won"] = 0
-        self.df["player_2_h2h_won"] = 0
-        self.df["h2h_diff"] = 0
-
     def add_total_match_diff(self) -> None:
         self.df["total_match_diff"] = (self.df["player_1_total_match"]
                                 - self.df["player_2_total_match"])
@@ -262,10 +288,6 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
             self.df[f"last_{num}_match_diff"] = (
                                 self.df[f"player_1_last_{num}_won"]
                                 - self.df[f"player_2_last_{num}_won"])
-
-    def add_head_to_head_diff(self) -> None:
-        self.df["h2h_diff"] = (self.df["player_1_h2h_won"]
-                       - self.df["player_2_h2h_won"])
 
     def add_win_ratio(self) -> None:
         self.df["player_1_win_ratio"] = np.where(
@@ -290,28 +312,6 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
             self.df[f"player_2_last_{num}_win_ratio"] = (
                     self.df[f"player_2_last_{num}_won"] / num
             )
-
-    def fill_head_to_head_won(self) -> defaultdict:
-        h2h_dict = defaultdict(lambda: [0, 0])
-        for idx, row in self.df.iterrows():
-            player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
-            player_1_won = row["player_1_won"]
-
-            if (player_2_id, player_1_id) in h2h_dict:
-                key = (player_2_id, player_1_id)
-                first, second = 1, 0
-
-            else:
-                key = (player_1_id, player_2_id)
-                first, second = 0, 1
-
-            self.df.at[idx, "player_1_h2h_won"] = h2h_dict[key][first]
-            self.df.at[idx, "player_2_h2h_won"] = h2h_dict[key][second]
-
-            if player_1_won: h2h_dict[key][first] += 1
-            else: h2h_dict[key][second] += 1
-
-        return h2h_dict
 
     def fill_total_won_match_data(self) -> defaultdict:
         match_dt = defaultdict(lambda: [0, 0]
