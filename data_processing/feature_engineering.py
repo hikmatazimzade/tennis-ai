@@ -118,6 +118,27 @@ def update_match_dict(match_dt: defaultdict, player_1_won: bool,
     match_dt[player_2_id][1] += 1
 
 
+class RankEngineeringDf:
+    def __init__(self, df: pd.DataFrame):
+        self.df = df
+
+    def apply_feature_engineering(self) -> pd.DataFrame:
+        self.add_rank_feature_differences()
+        return self.df
+
+    def add_rank_feature_differences(self) -> None:
+        self.add_rank_diff()
+        self.add_rank_points_diff()
+
+    def add_rank_diff(self) -> None:
+        self.df["rank_diff"] = (self.df["player_1_rank"]
+                            - self.df["player_2_rank"])
+
+    def add_rank_points_diff(self) -> None:
+        self.df["rank_points_diff"] = (self.df["player_1_rank_points"]
+                                       - self.df["player_2_rank_points"])
+
+
 class FeatureEngineeringDf(ABC):
     def __init__(self, df: pd.DataFrame):
         self.df = df.sort_values(["tourney_year", "tourney_month",
@@ -127,7 +148,7 @@ class FeatureEngineeringDf(ABC):
     def apply_feature_engineering(self) -> pd.DataFrame:
         logger.info("Applying feature engineering")
 
-        self.add_rank_feature_differences()
+        df = RankEngineeringDf(self.df).apply_feature_engineering()
         self.add_player_physical_features()
 
         self.create_match_features()
@@ -140,10 +161,6 @@ class FeatureEngineeringDf(ABC):
         self.add_elo_features()
 
         return self.df
-
-    def add_rank_feature_differences(self) -> None:
-        self.add_rank_diff()
-        self.add_rank_points_diff()
 
     def add_head_to_head_features(self) -> None:
         self.create_head_to_head()
@@ -174,14 +191,6 @@ class FeatureEngineeringDf(ABC):
         self.add_total_match_diff()
         self.add_won_match_diff()
         self.add_last_won_match_diff()
-
-    def add_rank_diff(self) -> None:
-        self.df["rank_diff"] = (self.df["player_1_rank"]
-                            - self.df["player_2_rank"])
-
-    def add_rank_points_diff(self) -> None:
-        self.df["rank_points_diff"] = (self.df["player_1_rank_points"]
-                                       - self.df["player_2_rank_points"])
 
     def add_age_diff(self) -> None:
         self.df["age_diff"] = (self.df["player_1_age"]
