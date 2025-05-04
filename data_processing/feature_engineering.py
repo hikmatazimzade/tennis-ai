@@ -342,7 +342,7 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
 
         self.df = (MatchDataEngineering(self.df, self.last_n_matches)
                    .apply_feature_engineering())
-        self.df = MatchFeatureDifference(df).apply_feature_engineering()
+        self.df = MatchFeatureDifference(self.df).apply_feature_engineering()
 
         self.add_win_ratio_features()
         self.add_elo_features()
