@@ -297,6 +297,31 @@ class MatchDataEngineering(FeatureEngineeringBase):
             match_dt[player_2_id][match_idx])
 
 
+class MatchFeatureDifference(FeatureEngineeringBase):
+    def apply_feature_engineering(self) -> pd.DataFrame:
+        self.add_match_feature_differences()
+        return self.df
+
+    def add_match_feature_differences(self) -> None:
+        self.add_total_match_diff()
+        self.add_won_match_diff()
+        self.add_last_won_match_diff()
+
+    def add_total_match_diff(self) -> None:
+        self.df["total_match_diff"] = (self.df["player_1_total_match"]
+                                - self.df["player_2_total_match"])
+
+    def add_won_match_diff(self) -> None:
+        self.df["won_match_diff"] = (self.df["player_1_won_match"]
+                                - self.df["player_2_won_match"])
+
+    def add_last_won_match_diff(self) -> None:
+        for idx, num in enumerate([5, 10, 20, 50], start=2):
+            self.df[f"last_{num}_match_diff"] = (
+                                self.df[f"player_1_last_{num}_won"]
+                                - self.df[f"player_2_last_{num}_won"])
+
+
 class FeatureEngineeringDf(FeatureEngineeringBase):
     def __init__(self, df: pd.DataFrame):
         super().__init__(df)
@@ -317,7 +342,7 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
 
         self.df = (MatchDataEngineering(self.df, self.last_n_matches)
                    .apply_feature_engineering())
-        self.add_match_feature_differences()
+        self.df = MatchFeatureDifference(df).apply_feature_engineering()
 
         self.add_win_ratio_features()
         self.add_elo_features()
@@ -334,25 +359,6 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
 
         self.add_surface_elo()
         self.add_surface_elo_diff()
-
-    def add_match_feature_differences(self) -> None:
-        self.add_total_match_diff()
-        self.add_won_match_diff()
-        self.add_last_won_match_diff()
-
-    def add_total_match_diff(self) -> None:
-        self.df["total_match_diff"] = (self.df["player_1_total_match"]
-                                - self.df["player_2_total_match"])
-
-    def add_won_match_diff(self) -> None:
-        self.df["won_match_diff"] = (self.df["player_1_won_match"]
-                                - self.df["player_2_won_match"])
-
-    def add_last_won_match_diff(self) -> None:
-        for idx, num in enumerate([5, 10, 20, 50], start=2):
-            self.df[f"last_{num}_match_diff"] = (
-                                self.df[f"player_1_last_{num}_won"]
-                                - self.df[f"player_2_last_{num}_won"])
 
     def add_win_ratio(self) -> None:
         self.df["player_1_win_ratio"] = np.where(
