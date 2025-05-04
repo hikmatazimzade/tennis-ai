@@ -124,7 +124,7 @@ class FeatureEngineeringBase(ABC):
         pass
 
 
-class RankEngineeringDf(FeatureEngineeringBase):
+class RankEngineering(FeatureEngineeringBase):
     def __init__(self, df: pd.DataFrame):
         self.df = df
 
@@ -166,6 +166,34 @@ class PhysicalEngineering(FeatureEngineeringBase):
                                   - self.df["player_2_ht"])
 
 
+class CreateMatchFeatures(FeatureEngineeringBase):
+    def __init__(self, df: pd.DataFrame, last_n_matches: tuple):
+        self.df = df
+        self.last_n_matches = last_n_matches
+
+    def apply_feature_engineering(self) -> pd.DataFrame:
+        self.create_match_features()
+        return self.df
+
+    def create_match_features(self) -> None:
+        self.create_total_match()
+        self.create_won_match()
+        self.create_last_won_matches()
+
+    def create_total_match(self) -> None:
+        self.df["player_1_total_match"] = 0
+        self.df["player_2_total_match"] = 0
+
+    def create_won_match(self) -> None:
+        self.df["player_1_won_match"] = 0
+        self.df["player_2_won_match"] = 0
+
+    def create_last_won_matches(self) -> None:
+        for num in self.last_n_matches:
+            self.df[f"player_1_last_{num}_won"] = 0
+            self.df[f"player_2_last_{num}_won"] = 0
+
+
 class FeatureEngineeringDf(FeatureEngineeringBase):
     def __init__(self, df: pd.DataFrame):
         self.df = df.sort_values(["tourney_year", "tourney_month",
@@ -175,10 +203,12 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
     def apply_feature_engineering(self) -> pd.DataFrame:
         logger.info("Applying feature engineering")
 
-        self.df = RankEngineeringDf(self.df).apply_feature_engineering()
+        self.df = RankEngineering(self.df).apply_feature_engineering()
         self.df = PhysicalEngineering(self.df).apply_feature_engineering()
 
-        self.create_match_features()
+        self.df = (CreateMatchFeatures(self.df, self.last_n_matches).
+                   apply_feature_engineering())
+
         self.add_head_to_head_features()
 
         self.fill_total_won_match_data()
@@ -205,11 +235,6 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
         self.add_surface_elo()
         self.add_surface_elo_diff()
 
-    def create_match_features(self) -> None:
-        self.create_total_match()
-        self.create_won_match()
-        self.create_last_won_matches()
-
     def add_match_feature_differences(self) -> None:
         self.add_total_match_diff()
         self.add_won_match_diff()
@@ -219,19 +244,6 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
         self.df["player_1_h2h_won"] = 0
         self.df["player_2_h2h_won"] = 0
         self.df["h2h_diff"] = 0
-
-    def create_total_match(self) -> None:
-        self.df["player_1_total_match"] = 0
-        self.df["player_2_total_match"] = 0
-
-    def create_won_match(self) -> None:
-        self.df["player_1_won_match"] = 0
-        self.df["player_2_won_match"] = 0
-
-    def create_last_won_matches(self) -> None:
-        for num in self.last_n_matches:
-            self.df[f"player_1_last_{num}_won"] = 0
-            self.df[f"player_2_last_{num}_won"] = 0
 
     def add_total_match_diff(self) -> None:
         self.df["total_match_diff"] = (self.df["player_1_total_match"]
