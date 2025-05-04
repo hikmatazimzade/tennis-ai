@@ -127,34 +127,53 @@ class FeatureEngineeringDf(ABC):
     def apply_feature_engineering(self) -> pd.DataFrame:
         logger.info("Applying feature engineering")
 
+        self.add_rank_features()
+        self.add_player_physical_features()
+
+        self.create_match_features()
+        self.add_head_to_head_features()
+
+        self.fill_total_won_match_data()
+        self.add_match_features()
+
+        self.add_win_ratio_features()
+        self.add_elo_features()
+
+        return self.df
+
+    def add_rank_features(self):
         self.add_rank_diff()
         self.add_rank_points_diff()
-        self.add_height_diff()
 
-        self.create_total_match()
-        self.create_won_match()
-        self.create_last_won_matches()
-
+    def add_head_to_head_features(self) -> None:
         self.create_head_to_head()
         self.fill_head_to_head_won()
         self.add_head_to_head_diff()
 
-        self.fill_total_won_match_data()
-        self.add_total_match_diff()
-        self.add_won_match_diff()
-        self.add_last_won_match_diff()
-
+    def add_win_ratio_features(self) -> None:
         self.add_win_ratio()
         self.add_last_matches_win_ratio()
 
-        self.add_age_diff()
+    def add_elo_features(self) -> None:
         self.add_elo()
         self.add_elo_diff()
 
         self.add_surface_elo()
         self.add_surface_elo_diff()
 
-        return self.df
+    def add_player_physical_features(self) -> None:
+        self.add_height_diff()
+        self.add_age_diff()
+
+    def create_match_features(self) -> None:
+        self.create_total_match()
+        self.create_won_match()
+        self.create_last_won_matches()
+
+    def add_match_features(self) -> None:
+        self.add_total_match_diff()
+        self.add_won_match_diff()
+        self.add_last_won_match_diff()
 
     def add_rank_diff(self) -> None:
         self.df["rank_diff"] = (self.df["player_1_rank"]
