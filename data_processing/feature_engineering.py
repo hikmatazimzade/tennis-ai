@@ -148,7 +148,7 @@ class FeatureEngineeringDf(ABC):
     def apply_feature_engineering(self) -> pd.DataFrame:
         logger.info("Applying feature engineering")
 
-        df = RankEngineeringDf(self.df).apply_feature_engineering()
+        self.df = RankEngineeringDf(self.df).apply_feature_engineering()
         self.add_player_physical_features()
 
         self.create_match_features()
