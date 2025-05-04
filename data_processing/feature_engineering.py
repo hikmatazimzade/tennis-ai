@@ -118,7 +118,13 @@ def update_match_dict(match_dt: defaultdict, player_1_won: bool,
     match_dt[player_2_id][1] += 1
 
 
-class RankEngineeringDf:
+class FeatureEngineeringBase(ABC):
+    @abstractmethod
+    def apply_feature_engineering(self) -> pd.DataFrame:
+        pass
+
+
+class RankEngineeringDf(FeatureEngineeringBase):
     def __init__(self, df: pd.DataFrame):
         self.df = df
 
@@ -139,7 +145,7 @@ class RankEngineeringDf:
                                        - self.df["player_2_rank_points"])
 
 
-class PhysicalEngineering:
+class PhysicalEngineering(FeatureEngineeringBase):
     def __init__(self, df: pd.DataFrame):
         self.df = df
 
@@ -160,7 +166,7 @@ class PhysicalEngineering:
                                   - self.df["player_2_ht"])
 
 
-class FeatureEngineeringDf(ABC):
+class FeatureEngineeringDf(FeatureEngineeringBase):
     def __init__(self, df: pd.DataFrame):
         self.df = df.sort_values(["tourney_year", "tourney_month",
                                        "tourney_day"])
