@@ -139,6 +139,27 @@ class RankEngineeringDf:
                                        - self.df["player_2_rank_points"])
 
 
+class PhysicalEngineering:
+    def __init__(self, df: pd.DataFrame):
+        self.df = df
+
+    def apply_feature_engineering(self) -> pd.DataFrame:
+        self.add_player_physical_features()
+        return self.df
+
+    def add_player_physical_features(self) -> None:
+        self.add_height_diff()
+        self.add_age_diff()
+
+    def add_age_diff(self) -> None:
+        self.df["age_diff"] = (self.df["player_1_age"]
+                               - self.df["player_2_age"])
+
+    def add_height_diff(self) -> None:
+        self.df["height_diff"] = (self.df["player_1_ht"]
+                                  - self.df["player_2_ht"])
+
+
 class FeatureEngineeringDf(ABC):
     def __init__(self, df: pd.DataFrame):
         self.df = df.sort_values(["tourney_year", "tourney_month",
@@ -149,7 +170,7 @@ class FeatureEngineeringDf(ABC):
         logger.info("Applying feature engineering")
 
         self.df = RankEngineeringDf(self.df).apply_feature_engineering()
-        self.add_player_physical_features()
+        self.df = PhysicalEngineering(self.df).apply_feature_engineering()
 
         self.create_match_features()
         self.add_head_to_head_features()
@@ -178,10 +199,6 @@ class FeatureEngineeringDf(ABC):
         self.add_surface_elo()
         self.add_surface_elo_diff()
 
-    def add_player_physical_features(self) -> None:
-        self.add_height_diff()
-        self.add_age_diff()
-
     def create_match_features(self) -> None:
         self.create_total_match()
         self.create_won_match()
@@ -191,14 +208,6 @@ class FeatureEngineeringDf(ABC):
         self.add_total_match_diff()
         self.add_won_match_diff()
         self.add_last_won_match_diff()
-
-    def add_age_diff(self) -> None:
-        self.df["age_diff"] = (self.df["player_1_age"]
-                               - self.df["player_2_age"])
-
-    def add_height_diff(self) -> None:
-        self.df["height_diff"] = (self.df["player_1_ht"]
-                                  - self.df["player_2_ht"])
 
     def create_head_to_head(self) -> None:
         self.df["player_1_h2h_won"] = 0
