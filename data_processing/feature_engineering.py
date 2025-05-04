@@ -239,7 +239,7 @@ class MatchDataEngineering(FeatureEngineeringBase):
         self.last_n_matches = last_n_matches
 
     def apply_feature_engineering(self) -> pd.DataFrame:
-        self.apply_feature_engineering()
+        self.fill_total_won_match_data()
         return self.df
 
     def fill_total_won_match_data(self) -> defaultdict:
