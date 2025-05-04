@@ -119,6 +119,9 @@ def update_match_dict(match_dt: defaultdict, player_1_won: bool,
 
 
 class FeatureEngineeringBase(ABC):
+    def __init__(self, df: pd.DataFrame):
+        self.df = df
+
     @abstractmethod
     def apply_feature_engineering(self) -> pd.DataFrame:
         pass
@@ -126,7 +129,7 @@ class FeatureEngineeringBase(ABC):
 
 class RankEngineering(FeatureEngineeringBase):
     def __init__(self, df: pd.DataFrame):
-        self.df = df
+        super().__init__(df)
 
     def apply_feature_engineering(self) -> pd.DataFrame:
         self.add_rank_feature_differences()
@@ -147,7 +150,7 @@ class RankEngineering(FeatureEngineeringBase):
 
 class PhysicalEngineering(FeatureEngineeringBase):
     def __init__(self, df: pd.DataFrame):
-        self.df = df
+        super().__init__(df)
 
     def apply_feature_engineering(self) -> pd.DataFrame:
         self.add_player_physical_features()
@@ -168,7 +171,7 @@ class PhysicalEngineering(FeatureEngineeringBase):
 
 class CreateMatchFeatures(FeatureEngineeringBase):
     def __init__(self, df: pd.DataFrame, last_n_matches: tuple):
-        self.df = df
+        super().__init__(df)
         self.last_n_matches = last_n_matches
 
     def apply_feature_engineering(self) -> pd.DataFrame:
@@ -196,6 +199,7 @@ class CreateMatchFeatures(FeatureEngineeringBase):
 
 class FeatureEngineeringDf(FeatureEngineeringBase):
     def __init__(self, df: pd.DataFrame):
+        super().__init__(df)
         self.df = df.sort_values(["tourney_year", "tourney_month",
                                        "tourney_day"])
         self.last_n_matches = (5, 10, 20, 50)
