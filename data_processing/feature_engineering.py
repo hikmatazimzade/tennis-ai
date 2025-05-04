@@ -359,6 +359,41 @@ class WinRatioEngineering(FeatureEngineeringBase):
             )
 
 
+class EloEngineering(FeatureEngineeringBase):
+    def apply_feature_engineering(self) -> pd.DataFrame:
+        self.add_elo_features()
+        return self.df
+
+    def add_elo_features(self) -> None:
+        self.add_elo()
+        self.add_elo_diff()
+
+        self.add_surface_elo()
+        self.add_surface_elo_diff()
+
+    def add_elo(self, K: int = 75) -> None:
+        player_1_elos, player_2_elos = get_elos(self.df, K)
+
+        self.df["player_1_elo"] = player_1_elos
+        self.df["player_2_elo"] = player_2_elos
+
+    def add_elo_diff(self) -> None:
+        self.df["elo_diff"] = (self.df["player_1_elo"]
+                               - self.df["player_2_elo"])
+
+    def add_surface_elo(self, K: int = 75) -> None:
+        player_1_elos, player_2_elos = get_surface_elos(self.df, K)
+
+        self.df["player_1_surface_elo"] = player_1_elos
+        self.df["player_2_surface_elo"] = player_2_elos
+
+    def add_surface_elo_diff(self) -> None:
+        self.df["surface_elo_diff"] = (
+                self.df["player_1_surface_elo"]
+                - self.df["player_2_surface_elo"]
+        )
+
+
 class FeatureEngineeringDf(FeatureEngineeringBase):
     def __init__(self, df: pd.DataFrame):
         super().__init__(df)
@@ -383,38 +418,9 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
 
         self.df = (WinRatioEngineering(self.df, self.last_n_matches)
                    .apply_feature_engineering())
-        self.add_elo_features()
+        self.df = EloEngineering(self.df).apply_feature_engineering()
 
         return self.df
-
-    def add_elo_features(self) -> None:
-        self.add_elo()
-        self.add_elo_diff()
-
-        self.add_surface_elo()
-        self.add_surface_elo_diff()
-
-    def add_elo(self, K: int=75) -> None:
-        player_1_elos, player_2_elos = get_elos(self.df, K)
-
-        self.df["player_1_elo"] = player_1_elos
-        self.df["player_2_elo"] = player_2_elos
-
-    def add_elo_diff(self) -> None:
-        self.df["elo_diff"] = (self.df["player_1_elo"]
-                - self.df["player_2_elo"])
-
-    def add_surface_elo(self, K:int=75) -> None:
-        player_1_elos, player_2_elos = get_surface_elos(self.df, K)
-
-        self.df["player_1_surface_elo"] = player_1_elos
-        self.df["player_2_surface_elo"] = player_2_elos
-
-    def add_surface_elo_diff(self) -> None:
-        self.df["surface_elo_diff"] = (
-            self.df["player_1_surface_elo"]
-            - self.df["player_2_surface_elo"]
-        )
 
 
 if __name__ == '__main__':
