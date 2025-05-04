@@ -322,6 +322,43 @@ class MatchFeatureDifference(FeatureEngineeringBase):
                                 - self.df[f"player_2_last_{num}_won"])
 
 
+class WinRatioEngineering(FeatureEngineeringBase):
+    def __init__(self, df: pd.DataFrame, last_n_matches: tuple):
+        super().__init__(df)
+        self.last_n_matches = last_n_matches
+
+    def apply_feature_engineering(self) -> pd.DataFrame:
+        self.add_win_ratio_features()
+        return self.df
+
+    def add_win_ratio_features(self) -> None:
+        self.add_win_ratio()
+        self.add_last_matches_win_ratio()
+
+    def add_win_ratio(self) -> None:
+        self.df["player_1_win_ratio"] = np.where(
+            self.df["player_1_total_match"] == 0,
+            0,
+            self.df["player_1_won_match"] / self.df["player_1_total_match"]
+        )
+
+        self.df["player_2_win_ratio"] = np.where(
+            self.df["player_2_total_match"] == 0,
+            0,
+            self.df["player_2_won_match"] / self.df["player_2_total_match"]
+        )
+
+    def add_last_matches_win_ratio(self) -> None:
+        for num in self.last_n_matches:
+            self.df[f"player_1_last_{num}_win_ratio"] = (
+                    self.df[f"player_1_last_{num}_won"] / num
+            )
+
+            self.df[f"player_2_last_{num}_win_ratio"] = (
+                    self.df[f"player_2_last_{num}_won"] / num
+            )
+
+
 class FeatureEngineeringDf(FeatureEngineeringBase):
     def __init__(self, df: pd.DataFrame):
         super().__init__(df)
@@ -344,14 +381,11 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
                    .apply_feature_engineering())
         self.df = MatchFeatureDifference(self.df).apply_feature_engineering()
 
-        self.add_win_ratio_features()
+        self.df = (WinRatioEngineering(self.df, self.last_n_matches)
+                   .apply_feature_engineering())
         self.add_elo_features()
 
         return self.df
-
-    def add_win_ratio_features(self) -> None:
-        self.add_win_ratio()
-        self.add_last_matches_win_ratio()
 
     def add_elo_features(self) -> None:
         self.add_elo()
@@ -359,30 +393,6 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
 
         self.add_surface_elo()
         self.add_surface_elo_diff()
-
-    def add_win_ratio(self) -> None:
-        self.df["player_1_win_ratio"] = np.where(
-            self.df["player_1_total_match"] == 0,
-            0,
-            self.df["player_1_won_match"] / self.df["player_1_total_match"]
-        )
-
-        self.df["player_2_win_ratio"] = np.where(
-            self.df["player_2_total_match"] == 0,
-            0,
-            self.df["player_2_won_match"] / self.df["player_2_total_match"]
-        )
-
-
-    def add_last_matches_win_ratio(self) -> None:
-        for num in self.last_n_matches:
-            self.df[f"player_1_last_{num}_win_ratio"] = (
-                    self.df[f"player_1_last_{num}_won"] / num
-            )
-
-            self.df[f"player_2_last_{num}_win_ratio"] = (
-                    self.df[f"player_2_last_{num}_won"] / num
-            )
 
     def add_elo(self, K: int=75) -> None:
         player_1_elos, player_2_elos = get_elos(self.df, K)
