@@ -233,6 +233,70 @@ class HeadToHeadEngineering(FeatureEngineeringBase):
                        - self.df["player_2_h2h_won"])
 
 
+class MatchDataEngineering(FeatureEngineeringBase):
+    def __init__(self, df: pd.DataFrame, last_n_matches: tuple):
+        super().__init__(df)
+        self.last_n_matches = last_n_matches
+
+    def apply_feature_engineering(self) -> pd.DataFrame:
+        self.apply_feature_engineering()
+        return self.df
+
+    def fill_total_won_match_data(self) -> defaultdict:
+        match_dt = defaultdict(lambda: [0, 0]
+            + len(self.last_n_matches) * [0])
+        # index 0 won, 1 total, then last_n_matches results
+
+        for row_idx, row in self.df.iterrows():
+            player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
+            player_1_won = row["player_1_won"]
+
+            self.update_match_data(match_dt, player_1_id,
+                    player_2_id, player_1_won, row_idx)
+
+        return match_dt
+
+    def update_match_data(self, match_dt: defaultdict,
+                          player_1_id: int, player_2_id: int, player_1_won: bool,
+                          row_idx) -> None:
+        self.update_total_won_match(match_dt, player_1_id,
+                                    player_2_id, row_idx)
+
+        self.update_last_won_matches(match_dt, player_1_id,
+                                     player_2_id, row_idx)
+
+        self.update_matches_dict(match_dt, player_1_id,
+                                 player_2_id, player_1_won)
+
+    def update_total_won_match(self, match_dt: defaultdict, player_1_id: int,
+                               player_2_id: int, row_idx) -> None:
+        self.df.at[row_idx, "player_1_won_match"] = match_dt[player_1_id][0]
+        self.df.at[row_idx, "player_2_won_match"] = match_dt[player_2_id][0]
+
+        self.df.at[row_idx, "player_1_total_match"] = match_dt[player_1_id][1]
+        self.df.at[row_idx, "player_2_total_match"] = match_dt[player_2_id][1]
+
+    def update_last_won_matches(self, match_dt: defaultdict, player_1_id: int,
+                                player_2_id: int, row_idx) -> None:
+        for match_idx, num in enumerate(self.last_n_matches, start=2):
+            self.update_last_won_match(match_dt, player_1_id,
+                                       player_2_id, match_idx, num, row_idx)
+
+    def update_matches_dict(self, match_dt: defaultdict, player_1_id: int,
+                            player_2_id: int, player_1_won: bool) -> None:
+        update_match_dict(match_dt, player_1_won,
+                          player_1_id, player_2_id,
+                          self.last_n_matches)
+
+    def update_last_won_match(self, match_dt: defaultdict, player_1_id: int,
+            player_2_id: int, match_idx: int, num: int, row_idx) -> None:
+        self.df.at[row_idx, f"player_1_last_{num}_won"] = (
+            match_dt[player_1_id][match_idx])
+
+        self.df.at[row_idx, f"player_2_last_{num}_won"] = (
+            match_dt[player_2_id][match_idx])
+
+
 class FeatureEngineeringDf(FeatureEngineeringBase):
     def __init__(self, df: pd.DataFrame):
         super().__init__(df)
@@ -246,12 +310,13 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
         self.df = RankEngineering(self.df).apply_feature_engineering()
         self.df = PhysicalEngineering(self.df).apply_feature_engineering()
 
-        self.df = (CreateMatchFeatures(self.df, self.last_n_matches).
-                   apply_feature_engineering())
+        self.df = (CreateMatchFeatures(self.df, self.last_n_matches)
+                   .apply_feature_engineering())
 
         self.df = HeadToHeadEngineering(self.df).apply_feature_engineering()
 
-        self.fill_total_won_match_data()
+        self.df = (MatchDataEngineering(self.df, self.last_n_matches)
+                   .apply_feature_engineering())
         self.add_match_feature_differences()
 
         self.add_win_ratio_features()
@@ -312,60 +377,6 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
             self.df[f"player_2_last_{num}_win_ratio"] = (
                     self.df[f"player_2_last_{num}_won"] / num
             )
-
-    def fill_total_won_match_data(self) -> defaultdict:
-        match_dt = defaultdict(lambda: [0, 0]
-            + len(self.last_n_matches) * [0])
-        # index 0 won, 1 total, then last_n_matches results
-
-        for row_idx, row in self.df.iterrows():
-            player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
-            player_1_won = row["player_1_won"]
-
-            self.update_match_data(match_dt, player_1_id,
-                    player_2_id, player_1_won, row_idx)
-
-        return match_dt
-
-    def update_total_won_match(self, match_dt: defaultdict, player_1_id: int,
-            player_2_id: int, row_idx) -> None:
-        self.df.at[row_idx, "player_1_won_match"] = match_dt[player_1_id][0]
-        self.df.at[row_idx, "player_2_won_match"] = match_dt[player_2_id][0]
-
-        self.df.at[row_idx, "player_1_total_match"] = match_dt[player_1_id][1]
-        self.df.at[row_idx, "player_2_total_match"] = match_dt[player_2_id][1]
-
-    def update_last_won_match(self, match_dt: defaultdict, player_1_id: int,
-            player_2_id: int, match_idx: int, num: int, row_idx) -> None:
-        self.df.at[row_idx, f"player_1_last_{num}_won"] = (
-            match_dt[player_1_id][match_idx])
-
-        self.df.at[row_idx, f"player_2_last_{num}_won"] = (
-            match_dt[player_2_id][match_idx])
-
-    def update_match_data(self, match_dt: defaultdict,
-        player_1_id: int, player_2_id: int, player_1_won: bool,
-                row_idx) -> None:
-        self.update_total_won_match(match_dt, player_1_id,
-                                    player_2_id, row_idx)
-
-        self.update_last_won_matches(match_dt, player_1_id,
-                                     player_2_id, row_idx)
-
-        self.update_matches_dict(match_dt, player_1_id,
-                                 player_2_id, player_1_won)
-
-    def update_last_won_matches(self, match_dt: defaultdict, player_1_id: int,
-            player_2_id: int, row_idx) -> None:
-        for match_idx, num in enumerate(self.last_n_matches, start=2):
-            self.update_last_won_match(match_dt, player_1_id,
-                                       player_2_id, match_idx, num, row_idx)
-
-    def update_matches_dict(self, match_dt: defaultdict, player_1_id: int,
-                             player_2_id: int, player_1_won: bool) -> None:
-        update_match_dict(match_dt, player_1_won,
-                          player_1_id, player_2_id,
-                          self.last_n_matches)
 
     def add_elo(self, K: int=75) -> None:
         player_1_elos, player_2_elos = get_elos(self.df, K)
