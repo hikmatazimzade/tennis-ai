@@ -27,11 +27,10 @@ def get_elos(df: pd.DataFrame, K:int) -> Tuple[list, list]:
 
 
 def get_surface_index(carpet: bool, clay: bool, grass: bool) -> int:
-    if carpet: surface_idx = 0
-    if clay: surface_idx = 1
-    if grass: surface_idx = 2
-    else: surface_idx = 3
-    return surface_idx
+    if carpet: return 0
+    if clay: return 1
+    if grass: return 2
+    else: return 3
 
 
 def append_surface_elos(player_1_elos: list, player_2_elos: list, player_1_id: int,
