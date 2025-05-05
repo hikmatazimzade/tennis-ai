@@ -111,7 +111,7 @@ def update_match_dict(match_dt: defaultdict, player_1_won: bool,
         match_dt[player_2_id][0] += 1
         for i, num in enumerate(last_n_matches, start=2):
             match_dt[player_2_id][i] = min(match_dt[player_2_id][i] + 1, num)
-            match_dt[player_2_id][i] = max(match_dt[player_2_id][i] - 1, 0)
+            match_dt[player_1_id][i] = max(match_dt[player_1_id][i] - 1, 0)
 
     match_dt[player_1_id][1] += 1
     match_dt[player_2_id][1] += 1
