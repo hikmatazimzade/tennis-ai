@@ -118,6 +118,11 @@ def update_match_dict(match_dt: defaultdict, player_1_won: bool,
     match_dt[player_2_id][1] += 1
 
 
+def append_player_elo_progress(players_elo_history: defaultdict,
+            player_id: int, player_elo: float) -> None:
+    players_elo_history[player_id].append(player_elo)
+
+
 class FeatureEngineeringBase(ABC):
     def __init__(self, df: pd.DataFrame):
         self.df = df
@@ -360,6 +365,10 @@ class WinRatioEngineering(FeatureEngineeringBase):
 
 
 class EloEngineering(FeatureEngineeringBase):
+    def __init__(self, df: pd.DataFrame, last_n_matches: tuple):
+        super().__init__(df)
+        self.last_n_matches = last_n_matches
+
     def apply_feature_engineering(self) -> pd.DataFrame:
         self.add_elo_features()
         return self.df
@@ -370,6 +379,9 @@ class EloEngineering(FeatureEngineeringBase):
 
         self.add_surface_elo()
         self.add_surface_elo_diff()
+
+        self.add_elo_progress_column()
+        self.add_last_matches_elo_progress()
 
     def add_elo(self, K: int = 75) -> None:
         player_1_elos, player_2_elos = get_elos(self.df, K)
@@ -393,6 +405,56 @@ class EloEngineering(FeatureEngineeringBase):
                 - self.df["player_2_surface_elo"]
         )
 
+    def add_elo_progress_column(self):
+        for num in self.last_n_matches:
+            self.df[f"player_1_last_{num}_elo_progress"] = 0.0
+            self.df[f"player_2_last_{num}_elo_progress"] = 0.0
+
+    def add_last_matches_elo_progress(self) -> None:
+        players_elo_history = defaultdict(lambda: [])
+        for row_idx, row in self.df.iterrows():
+            player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
+            player_1_elo = row["player_1_elo"]
+            player_2_elo = row["player_2_elo"]
+
+            for last_n in self.last_n_matches:
+                player_1_history = players_elo_history[player_1_id]
+                player_2_history = players_elo_history[player_2_id]
+
+                self.set_players_elo_progress(players_elo_history, player_1_history,
+                    player_2_history, last_n,
+                    player_1_id, player_2_id, row_idx)
+
+            append_player_elo_progress(players_elo_history, player_1_id, player_1_elo)
+            append_player_elo_progress(players_elo_history, player_2_id, player_2_elo)
+
+    def set_players_elo_progress(self, players_elo_history: defaultdict,
+                player_1_history: List[float], player_2_history: List[float],
+                last_n: int, player_1_id: int, player_2_id: int, row_idx):
+        self.handle_player_elo_progress(players_elo_history,
+                                        player_1_history, player_1_id,
+                                        last_n, 1, row_idx)
+
+        self.handle_player_elo_progress(players_elo_history,
+                                        player_2_history, player_2_id,
+                                        last_n, 2, row_idx)
+
+    def handle_player_elo_progress(self, players_elo_history: defaultdict,
+                player_history: List[float], player_id: int, last_n: int,
+                player_num: int, row_idx) -> None:
+        if not player_history:
+            new_progress = 0
+
+        elif last_n > len(players_elo_history[player_id]):
+            new_progress = player_history[-1]/ player_history[0]
+
+        else:
+            new_progress = (player_history[-1]
+                            / player_history[len(player_history) - last_n])
+
+        self.df.at[row_idx, (f"player_{player_num}_last_{last_n}"
+                             "_elo_progress")] = new_progress
+
 
 class FeatureEngineeringDf(FeatureEngineeringBase):
     def __init__(self, df: pd.DataFrame):
@@ -414,11 +476,14 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
 
         self.df = (MatchDataEngineering(self.df, self.last_n_matches)
                    .apply_feature_engineering())
+
         self.df = MatchFeatureDifference(self.df).apply_feature_engineering()
 
         self.df = (WinRatioEngineering(self.df, self.last_n_matches)
                    .apply_feature_engineering())
-        self.df = EloEngineering(self.df).apply_feature_engineering()
+
+        self.df = (EloEngineering(self.df, self.last_n_matches)
+                   .apply_feature_engineering())
 
         return self.df
 
