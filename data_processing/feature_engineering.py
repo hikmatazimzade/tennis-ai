@@ -302,6 +302,10 @@ class MatchDataEngineering(FeatureEngineeringBase):
 
 
 class MatchFeatureDifference(FeatureEngineeringBase):
+    def __init__(self, df: pd.DataFrame, last_n_matches: tuple):
+        super().__init__(df)
+        self.last_n_matches = last_n_matches
+
     def apply_feature_engineering(self) -> pd.DataFrame:
         self.add_match_feature_differences()
         return self.df
@@ -320,7 +324,7 @@ class MatchFeatureDifference(FeatureEngineeringBase):
                                 - self.df["player_2_won_match"])
 
     def add_last_won_match_diff(self) -> None:
-        for idx, num in enumerate([5, 10, 20, 50], start=2):
+        for idx, num in enumerate(self.last_n_matches, start=2):
             self.df[f"last_{num}_match_diff"] = (
                                 self.df[f"player_1_last_{num}_won"]
                                 - self.df[f"player_2_last_{num}_won"])
@@ -476,7 +480,8 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
         self.df = (MatchDataEngineering(self.df, self.last_n_matches)
                    .apply_feature_engineering())
 
-        self.df = MatchFeatureDifference(self.df).apply_feature_engineering()
+        self.df = (MatchFeatureDifference(self.df, self.last_n_matches)
+                   .apply_feature_engineering())
 
         self.df = (WinRatioEngineering(self.df, self.last_n_matches)
                    .apply_feature_engineering())
