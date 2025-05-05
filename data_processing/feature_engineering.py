@@ -408,7 +408,7 @@ class EloEngineering(FeatureEngineeringBase):
                 - self.df["player_2_surface_elo"]
         )
 
-    def add_elo_progress_column(self):
+    def add_elo_progress_column(self) -> None:
         for num in self.last_n_matches:
             self.df[f"player_1_last_{num}_elo_progress"] = 0.0
             self.df[f"player_2_last_{num}_elo_progress"] = 0.0
