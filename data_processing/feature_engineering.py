@@ -368,7 +368,7 @@ class WinRatioEngineering(FeatureEngineeringBase):
 
 
 class EloEngineering(FeatureEngineeringBase):
-    def __init__(self, df: pd.DataFrame, last_n_matches: tuple, K: int=34):
+    def __init__(self, df: pd.DataFrame, last_n_matches: tuple, K: int=24):
         super().__init__(df)
         self.last_n_matches = last_n_matches
         self.K = K
