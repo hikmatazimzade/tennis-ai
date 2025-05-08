@@ -368,9 +368,10 @@ class WinRatioEngineering(FeatureEngineeringBase):
 
 
 class EloEngineering(FeatureEngineeringBase):
-    def __init__(self, df: pd.DataFrame, last_n_matches: tuple):
+    def __init__(self, df: pd.DataFrame, last_n_matches: tuple, K: int=34):
         super().__init__(df)
         self.last_n_matches = last_n_matches
+        self.K = K
 
     def apply_feature_engineering(self) -> pd.DataFrame:
         self.add_elo_features()
@@ -386,8 +387,8 @@ class EloEngineering(FeatureEngineeringBase):
         self.add_elo_progress_column()
         self.add_last_matches_elo_progress()
 
-    def add_elo(self, K: int = 75) -> None:
-        player_1_elos, player_2_elos = get_elos(self.df, K)
+    def add_elo(self) -> None:
+        player_1_elos, player_2_elos = get_elos(self.df, self.K)
 
         self.df["player_1_elo"] = player_1_elos
         self.df["player_2_elo"] = player_2_elos
@@ -396,8 +397,8 @@ class EloEngineering(FeatureEngineeringBase):
         self.df["elo_diff"] = (self.df["player_1_elo"]
                                - self.df["player_2_elo"])
 
-    def add_surface_elo(self, K: int = 75) -> None:
-        player_1_elos, player_2_elos = get_surface_elos(self.df, K)
+    def add_surface_elo(self) -> None:
+        player_1_elos, player_2_elos = get_surface_elos(self.df, self.K)
 
         self.df["player_1_surface_elo"] = player_1_elos
         self.df["player_2_surface_elo"] = player_2_elos
