@@ -131,14 +131,19 @@ class FeatureEngineeringBase(ABC):
         pass
 
 
-class RankEngineering(FeatureEngineeringBase):
+class PlayerStatsEngineering(FeatureEngineeringBase):
     def apply_feature_engineering(self) -> pd.DataFrame:
         self.add_rank_feature_differences()
+        self.add_seed_diff()
         return self.df
 
     def add_rank_feature_differences(self) -> None:
         self.add_rank_diff()
         self.add_rank_points_diff()
+
+    def add_seed_diff(self) -> None:
+        self.df["seed_diff"] = (self.df["player_1_seed"]
+                            - self.df["player_2_seed"])
 
     def add_rank_diff(self) -> None:
         self.df["rank_diff"] = (self.df["player_1_rank"]
@@ -470,7 +475,7 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
     def apply_feature_engineering(self) -> pd.DataFrame:
         logger.info("Applying feature engineering")
 
-        self.df = RankEngineering(self.df).apply_feature_engineering()
+        self.df = PlayerStatsEngineering(self.df).apply_feature_engineering()
         self.df = PhysicalEngineering(self.df).apply_feature_engineering()
 
         self.df = (CreateMatchFeatures(self.df, self.last_n_matches)
