@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from data_processing.data_preprocessing import CleanDf
@@ -8,12 +9,13 @@ logger = get_logger("data_processing.random_forest")
 
 
 class CleanRandomForestDf(CleanDf):
-    def handle_nan_seed_values(self):
-        self.df.fillna({"winner_seed": 999}, inplace=True)
-        self.df.fillna({"loser_seed": 999}, inplace=True)
+    def handle_nan_seed_values(self, new_seed: int=64):
+        # Max seed value is 35
+        self.df.fillna({"winner_seed": new_seed}, inplace=True)
+        self.df.fillna({"loser_seed": new_seed}, inplace=True)
 
-        self.df["winner_was_seeded"] = self.df["winner_seed"] != 999
-        self.df["loser_was_seeded"] = self.df["loser_seed"] != 999
+        self.df["winner_was_seeded"] = self.df["winner_seed"] != new_seed
+        self.df["loser_was_seeded"] = self.df["loser_seed"] != new_seed
 
     def handle_winner_loser_ioc_values(self):
         stacked = self.df[["winner_ioc", "loser_ioc"]].stack()
