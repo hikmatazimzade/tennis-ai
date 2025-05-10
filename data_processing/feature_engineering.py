@@ -349,6 +349,7 @@ class WinRatioEngineering(FeatureEngineeringBase):
         self.add_last_matches_win_ratio()
 
         self.add_win_ratio_diff()
+        self.add_last_matches_win_ratio_diff()
 
     def add_win_ratio(self) -> None:
         self.df["player_1_win_ratio"] = np.where(
@@ -375,6 +376,13 @@ class WinRatioEngineering(FeatureEngineeringBase):
 
             self.df[f"player_2_last_{num}_win_ratio"] = (
                     self.df[f"player_2_last_{num}_won"] / num
+            )
+
+    def add_last_matches_win_ratio_diff(self) -> None:
+        for num in self.last_n_matches:
+            self.df[f"last_{num}_win_ratio_diff"] = (
+                self.df[f"player_1_last_{num}_win_ratio"]
+                - self.df[f"player_2_last_{num}_win_ratio"]
             )
 
 
