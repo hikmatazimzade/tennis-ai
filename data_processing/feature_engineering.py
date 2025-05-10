@@ -348,6 +348,8 @@ class WinRatioEngineering(FeatureEngineeringBase):
         self.add_win_ratio()
         self.add_last_matches_win_ratio()
 
+        self.add_win_ratio_diff()
+
     def add_win_ratio(self) -> None:
         self.df["player_1_win_ratio"] = np.where(
             self.df["player_1_total_match"] == 0,
@@ -360,6 +362,10 @@ class WinRatioEngineering(FeatureEngineeringBase):
             0,
             self.df["player_2_won_match"] / self.df["player_2_total_match"]
         )
+
+    def add_win_ratio_diff(self) -> None:
+        self.df["win_ratio_diff"] = (self.df["player_1_win_ratio"]
+                                    - self.df["player_2_win_ratio"])
 
     def add_last_matches_win_ratio(self) -> None:
         for num in self.last_n_matches:
