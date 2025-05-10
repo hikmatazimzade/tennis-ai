@@ -196,8 +196,8 @@ class CreateMatchFeatures(FeatureEngineeringBase):
 
     def create_last_won_matches(self) -> None:
         for num in self.last_n_matches:
-            self.df[f"player_1_last_{num}_won"] = 0
-            self.df[f"player_2_last_{num}_won"] = 0
+            self.df[f"player_1_last_{num}_match_won"] = 0
+            self.df[f"player_2_last_{num}_match_won"] = 0
 
 
 class HeadToHeadEngineering(FeatureEngineeringBase):
@@ -299,10 +299,10 @@ class MatchDataEngineering(FeatureEngineeringBase):
 
     def update_last_won_match(self, match_dt: defaultdict, player_1_id: int,
             player_2_id: int, match_idx: int, num: int, row_idx) -> None:
-        self.df.at[row_idx, f"player_1_last_{num}_won"] = (
+        self.df.at[row_idx, f"player_1_last_{num}_match_won"] = (
             match_dt[player_1_id][match_idx])
 
-        self.df.at[row_idx, f"player_2_last_{num}_won"] = (
+        self.df.at[row_idx, f"player_2_last_{num}_match_won"] = (
             match_dt[player_2_id][match_idx])
 
 
@@ -331,8 +331,8 @@ class MatchFeatureDifference(FeatureEngineeringBase):
     def add_last_won_match_diff(self) -> None:
         for idx, num in enumerate(self.last_n_matches, start=2):
             self.df[f"last_{num}_match_diff"] = (
-                                self.df[f"player_1_last_{num}_won"]
-                                - self.df[f"player_2_last_{num}_won"])
+                                self.df[f"player_1_last_{num}_match_won"]
+                                - self.df[f"player_2_last_{num}_match_won"])
 
 
 class WinRatioEngineering(FeatureEngineeringBase):
@@ -371,11 +371,11 @@ class WinRatioEngineering(FeatureEngineeringBase):
     def add_last_matches_win_ratio(self) -> None:
         for num in self.last_n_matches:
             self.df[f"player_1_last_{num}_win_ratio"] = (
-                    self.df[f"player_1_last_{num}_won"] / num
+                    self.df[f"player_1_last_{num}_match_won"] / num
             )
 
             self.df[f"player_2_last_{num}_win_ratio"] = (
-                    self.df[f"player_2_last_{num}_won"] / num
+                    self.df[f"player_2_last_{num}_match_won"] / num
             )
 
     def add_last_matches_win_ratio_diff(self) -> None:
