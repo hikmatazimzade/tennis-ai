@@ -211,6 +211,7 @@ class HeadToHeadEngineering(FeatureEngineeringBase):
         self.add_head_to_head_diff()
 
         self.create_surface_head_to_head()
+        self.fill_surface_head_to_head_won()
         self.add_surface_head_to_head_diff()
 
     def create_head_to_head(self) -> None:
@@ -222,8 +223,40 @@ class HeadToHeadEngineering(FeatureEngineeringBase):
         self.df["player_1_surface_h2h_won"] = 0
 
     def add_surface_head_to_head_diff(self) -> None:
-        self.df["surface_h2h_djff"] = (self.df["player_1_surface_h2h_won"]
+        self.df["surface_h2h_diff"] = (self.df["player_1_surface_h2h_won"]
                                     - self.df["player_2_surface_h2h_won"])
+
+    def fill_surface_head_to_head_won(self) -> defaultdict:
+        surface_h2h_dict = defaultdict(lambda: [[0, 0], [0, 0],
+                                                [0, 0], [0, 0]])
+
+        for idx, row in self.df.iterrows():
+            player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
+            player_1_won = row["player_1_won"]
+
+            if (player_2_id, player_1_id) in surface_h2h_dict:
+                key = (player_2_id, player_1_id)
+                first, second = 1, 0
+
+            else:
+                key = (player_1_id, player_2_id)
+                first, second = 0, 1
+
+            carpet, clay = row["surface_Carpet"], row["surface_Clay"]
+            grass, hard = row["surface_Grass"], row["surface_Hard"]
+            surface_idx = get_surface_index(carpet, clay, grass)
+
+            self.df.at[idx, "player_1_surface_h2h_won"] = (
+                            surface_h2h_dict[key][surface_idx][first])
+            self.df.at[idx, "player_2_surface_h2h_won"] = (
+                            surface_h2h_dict[key][surface_idx][second])
+
+            if player_1_won:
+                surface_h2h_dict[key][surface_idx][first] += 1
+            else:
+                surface_h2h_dict[key][surface_idx][second] += 1
+
+        return surface_h2h_dict
 
     def fill_head_to_head_won(self) -> defaultdict:
         h2h_dict = defaultdict(lambda: [0, 0])
