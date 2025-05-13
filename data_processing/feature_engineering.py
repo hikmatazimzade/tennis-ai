@@ -210,10 +210,20 @@ class HeadToHeadEngineering(FeatureEngineeringBase):
         self.fill_head_to_head_won()
         self.add_head_to_head_diff()
 
+        self.create_surface_head_to_head()
+        self.add_surface_head_to_head_diff()
+
     def create_head_to_head(self) -> None:
         self.df["player_1_h2h_won"] = 0
         self.df["player_2_h2h_won"] = 0
-        self.df["h2h_diff"] = 0
+
+    def create_surface_head_to_head(self) -> None:
+        self.df["player_1_surface_h2h_won"] = 0
+        self.df["player_1_surface_h2h_won"] = 0
+
+    def add_surface_head_to_head_diff(self) -> None:
+        self.df["surface_h2h_djff"] = (self.df["player_1_surface_h2h_won"]
+                                    - self.df["player_2_surface_h2h_won"])
 
     def fill_head_to_head_won(self) -> defaultdict:
         h2h_dict = defaultdict(lambda: [0, 0])
