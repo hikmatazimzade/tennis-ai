@@ -178,11 +178,8 @@ class CreateMatchFeatures(FeatureEngineeringBase):
         self.last_n_matches = last_n_matches
 
     def apply_feature_engineering(self) -> pd.DataFrame:
-        self.create_match_features()
-        return self.df
-
-    def create_match_features(self) -> None:
         self.create_last_won_matches()
+        return self.df
 
     def create_last_won_matches(self) -> None:
         for num in self.last_n_matches:
@@ -310,14 +307,6 @@ class MatchDataEngineering(FeatureEngineeringBase):
         self.df["player_2_total_match"] = player_2_total_match
 
         return match_dt
-
-    def update_total_won_match(self, match_dt: defaultdict, player_1_id: int,
-                               player_2_id: int, row_idx) -> None:
-        self.df.at[row_idx, "player_1_won_match"] = match_dt[player_1_id][0]
-        self.df.at[row_idx, "player_2_won_match"] = match_dt[player_2_id][0]
-
-        self.df.at[row_idx, "player_1_total_match"] = match_dt[player_1_id][1]
-        self.df.at[row_idx, "player_2_total_match"] = match_dt[player_2_id][1]
 
     def update_last_won_matches(self, match_dt: defaultdict, player_1_id: int,
                                 player_2_id: int, row_idx) -> None:
