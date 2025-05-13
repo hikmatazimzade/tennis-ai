@@ -206,21 +206,11 @@ class HeadToHeadEngineering(FeatureEngineeringBase):
         return self.df
 
     def add_head_to_head_features(self) -> None:
-        self.create_head_to_head()
         self.fill_head_to_head_won()
         self.add_head_to_head_diff()
 
-        self.create_surface_head_to_head()
         self.fill_surface_head_to_head_won()
         self.add_surface_head_to_head_diff()
-
-    def create_head_to_head(self) -> None:
-        self.df["player_1_h2h_won"] = 0
-        self.df["player_2_h2h_won"] = 0
-
-    def create_surface_head_to_head(self) -> None:
-        self.df["player_1_surface_h2h_won"] = 0
-        self.df["player_1_surface_h2h_won"] = 0
 
     def add_surface_head_to_head_diff(self) -> None:
         self.df["surface_h2h_diff"] = (self.df["player_1_surface_h2h_won"]
@@ -229,6 +219,7 @@ class HeadToHeadEngineering(FeatureEngineeringBase):
     def fill_surface_head_to_head_won(self) -> defaultdict:
         surface_h2h_dict = defaultdict(lambda: [[0, 0], [0, 0],
                                                 [0, 0], [0, 0]])
+        player_1_surface_h2h_won, player_2_surface_h2h_won = [], []
 
         for idx, row in self.df.iterrows():
             player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
@@ -246,20 +237,25 @@ class HeadToHeadEngineering(FeatureEngineeringBase):
             grass, hard = row["surface_Grass"], row["surface_Hard"]
             surface_idx = get_surface_index(carpet, clay, grass)
 
-            self.df.at[idx, "player_1_surface_h2h_won"] = (
-                            surface_h2h_dict[key][surface_idx][first])
-            self.df.at[idx, "player_2_surface_h2h_won"] = (
-                            surface_h2h_dict[key][surface_idx][second])
+            player_1_surface_h2h_won.append(surface_h2h_dict
+                                            [key][surface_idx][first])
+            player_2_surface_h2h_won.append(surface_h2h_dict
+                                            [key][surface_idx][second])
 
             if player_1_won:
                 surface_h2h_dict[key][surface_idx][first] += 1
             else:
                 surface_h2h_dict[key][surface_idx][second] += 1
 
+        self.df["player_1_surface_h2h_won"] = player_1_surface_h2h_won
+        self.df["player_2_surface_h2h_won"] = player_2_surface_h2h_won
+
         return surface_h2h_dict
 
     def fill_head_to_head_won(self) -> defaultdict:
         h2h_dict = defaultdict(lambda: [0, 0])
+        player_1_h2h_won, player_2_h2h_won = [], []
+
         for idx, row in self.df.iterrows():
             player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
             player_1_won = row["player_1_won"]
@@ -272,11 +268,14 @@ class HeadToHeadEngineering(FeatureEngineeringBase):
                 key = (player_1_id, player_2_id)
                 first, second = 0, 1
 
-            self.df.at[idx, "player_1_h2h_won"] = h2h_dict[key][first]
-            self.df.at[idx, "player_2_h2h_won"] = h2h_dict[key][second]
+            player_1_h2h_won.append(h2h_dict[key][first])
+            player_2_h2h_won.append(h2h_dict[key][second])
 
             if player_1_won: h2h_dict[key][first] += 1
             else: h2h_dict[key][second] += 1
+
+        self.df["player_1_h2h_won"] = player_1_h2h_won
+        self.df["player_2_h2h_won"] = player_2_h2h_won
 
         return h2h_dict
 
