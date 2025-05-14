@@ -286,6 +286,7 @@ class MatchDataEngineering(FeatureEngineeringBase):
         # index 0 won, 1 total, then last_n_matches results
         player_1_won_match, player_2_won_match = [], []
         player_1_total_match, player_2_total_match = [], []
+        last_won_matches_1, last_won_matches_2 = [], []
 
         for row_idx, row in self.df.iterrows():
             player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
@@ -297,6 +298,9 @@ class MatchDataEngineering(FeatureEngineeringBase):
             player_1_total_match.append(match_dt[player_1_id][1])
             player_2_total_match.append(match_dt[player_2_id][1])
 
+            self.append_last_won_matches(match_dt, player_1_id, player_2_id,
+                                    last_won_matches_1, last_won_matches_2)
+
             self.update_matches_dict(match_dt, player_1_id,
                                      player_2_id, player_1_won)
 
@@ -306,27 +310,46 @@ class MatchDataEngineering(FeatureEngineeringBase):
         self.df["player_1_total_match"] = player_1_total_match
         self.df["player_2_total_match"] = player_2_total_match
 
+        self.update_last_won_matches(last_won_matches_1, last_won_matches_2)
+
         return match_dt
 
-    def update_last_won_matches(self, match_dt: defaultdict, player_1_id: int,
-                                player_2_id: int, row_idx) -> None:
+    def update_last_won_matches(self, last_won_matches_1: List[List[int]],
+                                last_won_matches_2: List[List[int]]):
+        last_won_matches_1 = list(zip(*last_won_matches_1))
+        last_won_matches_2 = list(zip(*last_won_matches_2))
+
+        for idx, num in enumerate(self.last_n_matches):
+            self.df[f"player_1_last_{num}_match_won"] = (
+                last_won_matches_1[idx])
+
+            self.df[f"player_2_last_{num}_match_won"] = (
+                last_won_matches_2[idx])
+
+    def append_last_won_matches(self, match_dt: defaultdict, player_1_id: int,
+                        player_2_id: int, last_won_matches_1: List[list],
+                                last_won_matches_2: List[list]):
+        curr_data_1, curr_data_2 = [], []
         for match_idx, num in enumerate(self.last_n_matches, start=2):
-            self.update_last_won_match(match_dt, player_1_id,
-                                       player_2_id, match_idx, num, row_idx)
+            match_data = self.get_last_won_match_data(match_dt, player_1_id,
+                                                player_2_id, match_idx)
+
+            curr_data_1.append(match_data[0])
+            curr_data_2.append(match_data[1])
+
+        last_won_matches_1.append(curr_data_1)
+        last_won_matches_2.append(curr_data_2)
+
+    def get_last_won_match_data(self, match_dt: defaultdict, player_1_id: int,
+            player_2_id: int, match_idx: int) -> Tuple[int, int]:
+        return (match_dt[player_1_id][match_idx],
+                match_dt[player_2_id][match_idx])
 
     def update_matches_dict(self, match_dt: defaultdict, player_1_id: int,
                             player_2_id: int, player_1_won: bool) -> None:
         update_match_dict(match_dt, player_1_won,
                           player_1_id, player_2_id,
                           self.last_n_matches)
-
-    def update_last_won_match(self, match_dt: defaultdict, player_1_id: int,
-            player_2_id: int, match_idx: int, num: int, row_idx) -> None:
-        self.df.at[row_idx, f"player_1_last_{num}_match_won"] = (
-            match_dt[player_1_id][match_idx])
-
-        self.df.at[row_idx, f"player_2_last_{num}_match_won"] = (
-            match_dt[player_2_id][match_idx])
 
 
 class MatchFeatureDifference(FeatureEngineeringBase):
