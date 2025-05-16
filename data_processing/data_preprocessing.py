@@ -23,7 +23,7 @@ class CleanDf(ABC):
         self.handle_nan_seed_values()
         self.handle_seed_values()
         self.handle_ranks()
-        self.drop_all_remaining_nans() # TODO: Modify it for tree-based models
+        self.drop_all_remaining_nans()
         self.handle_winner_loser_ioc_values()
         return self.df
 
