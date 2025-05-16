@@ -15,9 +15,9 @@ def get_elos(df: pd.DataFrame, K:int) -> Tuple[list, list]:
     player_1_elos = []
     player_2_elos = []
 
-    for _, row in df.iterrows():
-        player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
-        player_1_won = row["player_1_won"]
+    for row in df.itertuples(index=False):
+        player_1_id, player_2_id = row.player_1_id, row.player_2_id
+        player_1_won = row.player_1_won
 
         append_elos(player_1_elos, player_2_elos, player_1_id,
                     player_2_id, elo_rating)
@@ -59,13 +59,13 @@ def get_surface_elos(df: pd.DataFrame, K: int) -> Tuple[list, list]:
     player_1_elos = []
     player_2_elos = []
 
-    for _, row in df.iterrows():
-        carpet, clay = row["surface_Carpet"], row["surface_Clay"]
-        grass, hard = row["surface_Grass"], row["surface_Hard"]
+    for row in df.itertuples(index=False):
+        carpet, clay = row.surface_Carpet, row.surface_Clay
+        grass, hard = row.surface_Grass, row.surface_Hard
         surface_idx = get_surface_index(carpet, clay, grass)
 
-        player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
-        player_1_won = row["player_1_won"]
+        player_1_id, player_2_id = row.player_1_id, row.player_2_id
+        player_1_won = row.player_1_won
 
         append_surface_elos(player_1_elos, player_2_elos, player_1_id,
                     player_2_id, elo_rating, surface_idx)
@@ -208,9 +208,9 @@ class HeadToHeadEngineering(FeatureEngineeringBase):
                                                 [0, 0], [0, 0]])
         player_1_surface_h2h_won, player_2_surface_h2h_won = [], []
 
-        for idx, row in self.df.iterrows():
-            player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
-            player_1_won = row["player_1_won"]
+        for row in self.df.itertuples():
+            player_1_id, player_2_id = row.player_1_id, row.player_2_id
+            player_1_won = row.player_1_won
 
             if (player_2_id, player_1_id) in surface_h2h_dict:
                 key = (player_2_id, player_1_id)
@@ -220,8 +220,8 @@ class HeadToHeadEngineering(FeatureEngineeringBase):
                 key = (player_1_id, player_2_id)
                 first, second = 0, 1
 
-            carpet, clay = row["surface_Carpet"], row["surface_Clay"]
-            grass, hard = row["surface_Grass"], row["surface_Hard"]
+            carpet, clay = row.surface_Carpet, row.surface_Clay
+            grass, hard = row.surface_Grass, row.surface_Hard
             surface_idx = get_surface_index(carpet, clay, grass)
 
             player_1_surface_h2h_won.append(surface_h2h_dict
@@ -243,9 +243,9 @@ class HeadToHeadEngineering(FeatureEngineeringBase):
         h2h_dict = defaultdict(lambda: [0, 0])
         player_1_h2h_won, player_2_h2h_won = [], []
 
-        for idx, row in self.df.iterrows():
-            player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
-            player_1_won = row["player_1_won"]
+        for row in self.df.itertuples():
+            player_1_id, player_2_id = row.player_1_id, row.player_2_id
+            player_1_won = row.player_1_won
 
             if (player_2_id, player_1_id) in h2h_dict:
                 key = (player_2_id, player_1_id)
@@ -288,9 +288,9 @@ class MatchDataEngineering(FeatureEngineeringBase):
         player_1_total_match, player_2_total_match = [], []
         last_won_matches_1, last_won_matches_2 = [], []
 
-        for row_idx, row in self.df.iterrows():
-            player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
-            player_1_won = row["player_1_won"]
+        for row in self.df.itertuples():
+            player_1_id, player_2_id = row.player_1_id, row.player_2_id
+            player_1_won = row.player_1_won
 
             player_1_won_match.append(match_dt[player_1_id][0])
             player_2_won_match.append(match_dt[player_2_id][0])
