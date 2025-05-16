@@ -13,18 +13,24 @@ logger = get_logger("data_processing.data_preprocessing")
 class CleanDf(ABC):
     def __init__(self, train_csv: str=TRAIN_CSV):
         self.df = pd.read_csv(train_csv)
+        self.cleaning_steps = [
+            self.replace_hands,
+            self.encode_tourney_date,
+            self.apply_one_hot_encoding,
+            self.drop_columns,
+            self.handle_ambidextrous_hand,
+
+            self.handle_nan_seed_values,
+            self.handle_seed_values,
+            self.handle_ranks,
+            self.drop_all_remaining_nans,
+            self.handle_winner_loser_ioc_values,
+        ]
 
     def clean(self) -> pd.DataFrame:
-        self.replace_hands()
-        self.encode_tourney_date()
-        self.apply_one_hot_encoding()
-        self.drop_columns()
-        self.handle_ambidextrous_hand()
-        self.handle_nan_seed_values()
-        self.handle_seed_values()
-        self.handle_ranks()
-        self.drop_all_remaining_nans()
-        self.handle_winner_loser_ioc_values()
+        for step in self.cleaning_steps:
+            step()
+
         return self.df
 
     def drop_columns(self, column_names: Tuple[str]=(
@@ -69,7 +75,7 @@ class CleanDf(ABC):
         self.df.replace({"winner_hand": {"U": "R"},
                          "loser_hand": {"U": "R"}}, inplace=True)
 
-    def handle_ambidextrous_hand(self):
+    def handle_ambidextrous_hand(self) -> None:
         for prefix in ["winner_hand", "loser_hand"]:
             a_col = f"{prefix}_A"
             r_col = f"{prefix}_R"
@@ -82,16 +88,16 @@ class CleanDf(ABC):
 
         self.df.drop(columns=["winner_hand_A", "loser_hand_A"], inplace=True)
 
-    def handle_seed_values(self):
+    def handle_seed_values(self) -> None:
         self.df["winner_seed"] = 1 / self.df["winner_seed"]
         self.df["loser_seed"] = 1 / self.df["loser_seed"]
 
     @abstractmethod
-    def handle_nan_seed_values(self):
+    def handle_nan_seed_values(self) -> None:
         pass
 
     @abstractmethod
-    def handle_winner_loser_ioc_values(self):
+    def handle_winner_loser_ioc_values(self) -> None:
         pass
 
     def apply_clip(self, cap: int=3000, column_names: Tuple[str]=(
