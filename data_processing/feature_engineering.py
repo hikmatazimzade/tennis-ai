@@ -172,21 +172,6 @@ class PhysicalEngineering(FeatureEngineeringBase):
                                   - self.df["player_2_ht"])
 
 
-class CreateMatchFeatures(FeatureEngineeringBase):
-    def __init__(self, df: pd.DataFrame, last_n_matches: tuple):
-        super().__init__(df)
-        self.last_n_matches = last_n_matches
-
-    def apply_feature_engineering(self) -> pd.DataFrame:
-        self.create_last_won_matches()
-        return self.df
-
-    def create_last_won_matches(self) -> None:
-        for num in self.last_n_matches:
-            self.df[f"player_1_last_{num}_match_won"] = 0
-            self.df[f"player_2_last_{num}_match_won"] = 0
-
-
 class HeadToHeadEngineering(FeatureEngineeringBase):
     def apply_feature_engineering(self) -> pd.DataFrame:
         self.add_head_to_head_features()
@@ -534,9 +519,6 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
         self.feature_engineering_steps = [
             PlayerStatsEngineering(self.df).apply_feature_engineering,
             PhysicalEngineering(self.df).apply_feature_engineering,
-
-            (CreateMatchFeatures(self.df, self.last_n_matches)
-             .apply_feature_engineering),
 
             HeadToHeadEngineering(self.df).apply_feature_engineering,
 
