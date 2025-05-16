@@ -531,29 +531,33 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
         self.df = df.sort_values(["tourney_year", "tourney_month",
                                        "tourney_day"])
         self.last_n_matches = (5, 10, 20, 50)
+        self.feature_engineering_steps = [
+            PlayerStatsEngineering(self.df).apply_feature_engineering,
+            PhysicalEngineering(self.df).apply_feature_engineering,
+
+            (CreateMatchFeatures(self.df, self.last_n_matches)
+             .apply_feature_engineering),
+
+            HeadToHeadEngineering(self.df).apply_feature_engineering,
+
+            (MatchDataEngineering(self.df, self.last_n_matches)
+            .apply_feature_engineering),
+
+            (MatchFeatureDifference(self.df, self.last_n_matches)
+             .apply_feature_engineering),
+
+            (WinRatioEngineering(self.df, self.last_n_matches)
+             .apply_feature_engineering),
+
+            (EloEngineering(self.df, self.last_n_matches)
+             .apply_feature_engineering)
+        ]
 
     def apply_feature_engineering(self) -> pd.DataFrame:
         logger.info("Applying feature engineering")
 
-        self.df = PlayerStatsEngineering(self.df).apply_feature_engineering()
-        self.df = PhysicalEngineering(self.df).apply_feature_engineering()
-
-        self.df = (CreateMatchFeatures(self.df, self.last_n_matches)
-                   .apply_feature_engineering())
-
-        self.df = HeadToHeadEngineering(self.df).apply_feature_engineering()
-
-        self.df = (MatchDataEngineering(self.df, self.last_n_matches)
-                   .apply_feature_engineering())
-
-        self.df = (MatchFeatureDifference(self.df, self.last_n_matches)
-                   .apply_feature_engineering())
-
-        self.df = (WinRatioEngineering(self.df, self.last_n_matches)
-                   .apply_feature_engineering())
-
-        self.df = (EloEngineering(self.df, self.last_n_matches)
-                   .apply_feature_engineering())
+        for step in self.feature_engineering_steps:
+            step()
 
         return self.df
 
