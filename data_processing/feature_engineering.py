@@ -33,6 +33,13 @@ def get_surface_index(carpet: bool, clay: bool, grass: bool) -> int:
     else: return 3
 
 
+def get_surface_index_by_row(row: pd.DataFrame.itertuples) -> int:
+    carpet, clay = row.surface_Carpet, row.surface_Clay
+    grass, hard = row.surface_Grass, row.surface_Hard
+    surface_idx = get_surface_index(carpet, clay, grass)
+    return surface_idx
+
+
 def append_surface_elos(player_1_elos: list, player_2_elos: list, player_1_id: int,
                 player_2_id: int, elo_rating, surface_idx: int) -> None:
     player_1_elos.append(elo_rating[player_1_id][surface_idx])
@@ -60,9 +67,7 @@ def get_surface_elos(df: pd.DataFrame, K: int) -> Tuple[list, list]:
     player_2_elos = []
 
     for row in df.itertuples(index=False):
-        carpet, clay = row.surface_Carpet, row.surface_Clay
-        grass, hard = row.surface_Grass, row.surface_Hard
-        surface_idx = get_surface_index(carpet, clay, grass)
+        surface_idx = get_surface_index_by_row(row)
 
         player_1_id, player_2_id = row.player_1_id, row.player_2_id
         player_1_won = row.player_1_won
@@ -205,7 +210,6 @@ class HeadToHeadEngineering(FeatureEngineeringBase):
             player_1_id, player_2_id = row.player_1_id, row.player_2_id
             player_1_won = row.player_1_won
 
-
             key, first, second = get_h2h_params(player_1_id,
                                                 player_2_id, h2h_dict)
 
@@ -236,9 +240,7 @@ class HeadToHeadEngineering(FeatureEngineeringBase):
             key, first, second = get_h2h_params(player_1_id,
                                                 player_2_id, surface_h2h_dict)
 
-            carpet, clay = row.surface_Carpet, row.surface_Clay
-            grass, hard = row.surface_Grass, row.surface_Hard
-            surface_idx = get_surface_index(carpet, clay, grass)
+            surface_idx = get_surface_index_by_row(row)
 
             player_1_surface_h2h_won.append(surface_h2h_dict
                                             [key][surface_idx][first])
