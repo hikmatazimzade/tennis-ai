@@ -365,10 +365,10 @@ class EloEngineering(FeatureEngineeringBase):
 
     def add_last_matches_elo_progress(self) -> None:
         players_elo_history = defaultdict(lambda: [])
-        for row_idx, row in self.df.iterrows():
-            player_1_id, player_2_id = row["player_1_id"], row["player_2_id"]
-            player_1_elo = row["player_1_elo"]
-            player_2_elo = row["player_2_elo"]
+        for row in self.df.itertuples():
+            row_idx = row.Index
+            player_1_id, player_2_id = row.player_1_id, row.player_2_id
+            player_1_elo, player_2_elo = row.player_1_elo, row.player_2_elo
 
             for last_n in self.last_n_matches:
                 player_1_history = players_elo_history[player_1_id]
@@ -378,8 +378,8 @@ class EloEngineering(FeatureEngineeringBase):
                     player_2_history, last_n,
                     player_1_id, player_2_id, row_idx)
 
-            append_player_elo_progress(players_elo_history, player_1_id, player_1_elo)
-            append_player_elo_progress(players_elo_history, player_2_id, player_2_elo)
+            append_players_elo_progress(players_elo_history, player_1_id,
+                                        player_2_id, player_1_elo, player_2_elo)
 
     def set_players_elo_progress(self, players_elo_history: defaultdict,
                 player_1_history: List[float], player_2_history: List[float],
@@ -399,7 +399,7 @@ class EloEngineering(FeatureEngineeringBase):
             new_progress = 0
 
         elif last_n > len(players_elo_history[player_id]):
-            new_progress = player_history[-1]/ player_history[0]
+            new_progress = player_history[-1] / player_history[0]
 
         else:
             new_progress = (player_history[-1]
