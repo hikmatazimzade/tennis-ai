@@ -5,14 +5,19 @@ from pandas import DataFrame
 
 from utils.logger import get_logger
 from data_processing.random_forest import CleanRandomForestDf
+from data_processing.xgboost import CleanXGBoostDf
+
 from data_processing.feature_engineering import FeatureEngineeringDf
 
 logger = get_logger("utils.dataframe")
 
 
-def get_cleaner(model: str) -> Union[CleanRandomForestDf]:
+def get_cleaner(model: str) -> Union[CleanRandomForestDf,
+                                    CleanXGBoostDf]:
     if model == "random_forest":
         return CleanRandomForestDf()
+    elif model == "xgboost":
+        return CleanXGBoostDf()
 
 
 def get_final_dataframe(model: str) -> DataFrame:

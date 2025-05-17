@@ -4,10 +4,10 @@ from data_processing.data_preprocessing import CleanDf
 
 from utils.logger import get_logger
 
-logger = get_logger("data_processing.random_forest")
+logger = get_logger("data_processing.xgboost")
 
 
-class CleanRandomForestDf(CleanDf):
+class CleanXGBoostDf(CleanDf):
     def handle_nan_seed_values(self, new_seed: int=64) -> None:
         # Max seed value is 35
         self.df.fillna({"winner_seed": new_seed}, inplace=True)
@@ -23,6 +23,6 @@ class CleanRandomForestDf(CleanDf):
 
 
 if __name__ == '__main__':
-    clean_random_forest_df = CleanRandomForestDf()
-    clean_random_forest_df.clean()
-    print(clean_random_forest_df.df.info())
+    clean_xgboost_df = CleanXGBoostDf()
+    clean_xgboost_df.clean()
+    print(clean_xgboost_df.df.info())
