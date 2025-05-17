@@ -337,7 +337,7 @@ class MatchDataEngineering(FeatureEngineeringBase):
                           self.last_n_matches)
 
 
-class MatchFeatureDifference(FeatureEngineeringBase):
+class MatchFeatureDifferenceEngineering(FeatureEngineeringBase):
     def __init__(self, df: pd.DataFrame, last_n_matches: tuple):
         super().__init__(df)
         self.last_n_matches = last_n_matches
@@ -518,6 +518,7 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
         self.last_n_matches = (5, 10, 20, 50)
         self.feature_engineering_steps = [
             PlayerStatsEngineering(self.df).apply_feature_engineering,
+
             PhysicalEngineering(self.df).apply_feature_engineering,
 
             HeadToHeadEngineering(self.df).apply_feature_engineering,
@@ -525,7 +526,7 @@ class FeatureEngineeringDf(FeatureEngineeringBase):
             (MatchDataEngineering(self.df, self.last_n_matches)
             .apply_feature_engineering),
 
-            (MatchFeatureDifference(self.df, self.last_n_matches)
+            (MatchFeatureDifferenceEngineering(self.df, self.last_n_matches)
              .apply_feature_engineering),
 
             (WinRatioEngineering(self.df, self.last_n_matches)
