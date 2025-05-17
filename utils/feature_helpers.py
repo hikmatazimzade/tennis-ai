@@ -116,6 +116,14 @@ def update_match_dict(match_dt: defaultdict, player_1_won: bool,
     match_dt[player_2_id][1] += 1
 
 
+def append_players_elo_progress(players_elo_history: defaultdict,
+                                player_1_id: int, player_2_id: int,
+                                player_1_elo: float,
+                                player_2_elo: float) -> None:
+    append_player_elo_progress(players_elo_history, player_1_id, player_1_elo)
+    append_player_elo_progress(players_elo_history, player_2_id, player_2_elo)
+
+
 def append_player_elo_progress(players_elo_history: defaultdict,
             player_id: int, player_elo: float) -> None:
     players_elo_history[player_id].append(player_elo)
