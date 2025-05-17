@@ -140,6 +140,12 @@ def get_h2h_params(player_1_id: int, player_2_id: int,
     return key, first, second
 
 
+def get_last_won_match_data(match_dt: defaultdict, player_1_id: int,
+        player_2_id: int, match_idx: int) -> Tuple[int, int]:
+    return (match_dt[player_1_id][match_idx],
+            match_dt[player_2_id][match_idx])
+
+
 class FeatureEngineeringBase(ABC):
     def __init__(self, df: pd.DataFrame):
         self.df = df
@@ -268,10 +274,10 @@ class MatchDataEngineering(FeatureEngineeringBase):
         self.last_n_matches = last_n_matches
 
     def apply_feature_engineering(self) -> pd.DataFrame:
-        self.fill_total_won_match_data()
+        self.add_won_match_data()
         return self.df
 
-    def fill_total_won_match_data(self) -> defaultdict:
+    def add_won_match_data(self) -> defaultdict:
         match_dt = defaultdict(lambda: [0, 0]
             + len(self.last_n_matches) * [0])
         # index 0 won, 1 total, then last_n_matches results
@@ -283,24 +289,16 @@ class MatchDataEngineering(FeatureEngineeringBase):
             player_1_id, player_2_id = row.player_1_id, row.player_2_id
             player_1_won = row.player_1_won
 
-            player_1_won_match.append(match_dt[player_1_id][0])
-            player_2_won_match.append(match_dt[player_2_id][0])
-
-            player_1_total_match.append(match_dt[player_1_id][1])
-            player_2_total_match.append(match_dt[player_2_id][1])
-
-            self.append_last_won_matches(match_dt, player_1_id, player_2_id,
-                                    last_won_matches_1, last_won_matches_2)
+            self.append(match_dt, player_1_id, player_2_id,
+                    player_1_won_match, player_2_won_match,
+                    player_1_total_match, player_2_total_match,
+                    last_won_matches_1, last_won_matches_2)
 
             self.update_matches_dict(match_dt, player_1_id,
                                      player_2_id, player_1_won)
 
-        self.df["player_1_won_match"] = player_1_won_match
-        self.df["player_2_won_match"] = player_2_won_match
-
-        self.df["player_1_total_match"] = player_1_total_match
-        self.df["player_2_total_match"] = player_2_total_match
-
+        self.update_won_match(player_1_won_match, player_2_won_match)
+        self.update_total_match(player_1_total_match, player_2_total_match)
         self.update_last_won_matches(last_won_matches_1, last_won_matches_2)
 
         return match_dt
@@ -317,12 +315,49 @@ class MatchDataEngineering(FeatureEngineeringBase):
             self.df[f"player_2_last_{num}_match_won"] = (
                 last_won_matches_2[idx])
 
+    def append(self, match_dt: defaultdict, player_1_id: int,
+            player_2_id: int,player_1_won_match: List[int],
+            player_2_won_match: List[int],player_1_total_match:  List[int],
+            player_2_total_match: List[int],
+            last_won_matches_1: List[List[int]],
+            last_won_matches_2: List[List[int]]) -> None:
+        self.append_won_match(match_dt, player_1_id, player_2_id,
+                              player_1_won_match, player_2_won_match)
+
+        self.append_total_match(match_dt, player_1_id, player_2_id,
+                                player_1_total_match, player_2_total_match)
+
+        self.append_last_won_matches(match_dt, player_1_id, player_2_id,
+                                     last_won_matches_1, last_won_matches_2)
+
+    def update_won_match(self, player_1_won_match: List[int],
+                         player_2_won_match: List[int]) -> None:
+        self.df["player_1_won_match"] = player_1_won_match
+        self.df["player_2_won_match"] = player_2_won_match
+
+    def update_total_match(self, player_1_total_match: List[int],
+                           player_2_total_match: List[int]) -> None:
+        self.df["player_1_total_match"] = player_1_total_match
+        self.df["player_2_total_match"] = player_2_total_match
+
+    def append_won_match(self, match_dt: defaultdict, player_1_id: int,
+            player_2_id: int, player_1_won_match: List[int],
+            player_2_won_match: List[int]) -> None:
+        player_1_won_match.append(match_dt[player_1_id][0])
+        player_2_won_match.append(match_dt[player_2_id][0])
+
+    def append_total_match(self, match_dt: defaultdict, player_1_id: int,
+            player_2_id: int, player_1_total_match: List[int],
+            player_2_total_match: List[int]) -> None:
+        player_1_total_match.append(match_dt[player_1_id][1])
+        player_2_total_match.append(match_dt[player_2_id][1])
+
     def append_last_won_matches(self, match_dt: defaultdict, player_1_id: int,
                         player_2_id: int, last_won_matches_1: List[list],
                                 last_won_matches_2: List[list]):
         curr_data_1, curr_data_2 = [], []
         for match_idx, num in enumerate(self.last_n_matches, start=2):
-            match_data = self.get_last_won_match_data(match_dt, player_1_id,
+            match_data = get_last_won_match_data(match_dt, player_1_id,
                                                 player_2_id, match_idx)
 
             curr_data_1.append(match_data[0])
@@ -330,11 +365,6 @@ class MatchDataEngineering(FeatureEngineeringBase):
 
         last_won_matches_1.append(curr_data_1)
         last_won_matches_2.append(curr_data_2)
-
-    def get_last_won_match_data(self, match_dt: defaultdict, player_1_id: int,
-            player_2_id: int, match_idx: int) -> Tuple[int, int]:
-        return (match_dt[player_1_id][match_idx],
-                match_dt[player_2_id][match_idx])
 
     def update_matches_dict(self, match_dt: defaultdict, player_1_id: int,
                             player_2_id: int, player_1_won: bool) -> None:
