@@ -1,8 +1,11 @@
-from typing import List, Union
+import os
+from typing import List, Union, Optional
 from secrets import choice
 
+import pandas as pd
 from pandas import DataFrame
 
+from config import ROOT_DIR
 from utils.logger import get_logger
 from data_processing.random_forest import CleanRandomForestDf
 from data_processing.xgboost import CleanXGBoostDf
@@ -18,6 +21,28 @@ def get_cleaner(model: str) -> Union[CleanRandomForestDf,
         return CleanRandomForestDf()
     elif model == "xgboost":
         return CleanXGBoostDf()
+
+
+def get_final_path(model: str) -> str:
+    final_path = os.path.join(ROOT_DIR, "data",
+                              f"atp_matches_final_{model}.csv")
+    return final_path
+
+
+def save_final_dataframe(model: str) -> None:
+    final_dataframe = get_final_dataframe(model)
+    final_path = get_final_path(model)
+
+    logger.info(f"Successfully saved {model} model to {final_path}!")
+    final_dataframe.to_csv(final_path)
+
+
+def read_csv(model: str) -> Optional[DataFrame]:
+    final_path = get_final_path(model)
+    if not os.path.exists(final_path):
+        raise FileNotFoundError(f"Final csv file for {model} not found!")
+
+    return pd.read_csv(final_path)
 
 
 def get_final_dataframe(model: str) -> DataFrame:
@@ -95,5 +120,9 @@ def get_remaining_cols(df: DataFrame) -> List[str]:
 
 
 if __name__ == '__main__':
-    df = get_final_dataframe("random_forest")
-    print(df.columns)
+    models = ("random_forest", "xgboost")
+    for model in models:
+        save_final_dataframe(model)
+
+    # df = get_final_dataframe("random_forest")
+    # print(df.columns)
