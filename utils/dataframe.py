@@ -9,6 +9,7 @@ from config import ROOT_DIR
 from utils.logger import get_logger
 from data_processing.random_forest import CleanRandomForestDf
 from data_processing.xgboost import CleanXGBoostDf
+from data_processing.catboost import CleanCatBoost
 
 from data_processing.feature_engineering import FeatureEngineeringDf
 
@@ -16,11 +17,13 @@ logger = get_logger("utils.dataframe")
 
 
 def get_cleaner(model: str) -> Union[CleanRandomForestDf,
-                                    CleanXGBoostDf]:
+                                    CleanXGBoostDf, CleanCatBoost]:
     if model == "random_forest":
         return CleanRandomForestDf()
     elif model == "xgboost":
         return CleanXGBoostDf()
+    elif model == "catboost":
+        return CleanCatBoost()
 
 
 def get_final_path(model: str) -> str:
@@ -162,7 +165,7 @@ def delete_columns(df: DataFrame,
 
 
 if __name__ == '__main__':
-    models = ("random_forest", "xgboost")
+    models = ("random_forest", "xgboost", "catboost")
     for model in models:
         save_final_dataframe(model)
 
