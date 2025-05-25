@@ -37,7 +37,7 @@ def save_final_dataframe(model: str) -> None:
     final_dataframe.to_csv(final_path)
 
 
-def read_csv(model: str) -> Optional[DataFrame]:
+def read_final_csv(model: str) -> Optional[DataFrame]:
     final_path = get_final_path(model)
     if not os.path.exists(final_path):
         raise FileNotFoundError(f"Final csv file for {model} not found!")
@@ -117,6 +117,48 @@ def get_loser_cols(df: DataFrame) -> List[str]:
 def get_remaining_cols(df: DataFrame) -> List[str]:
     return [d for d in df if not d.startswith("winner_") and
             not d.startswith("loser_")]
+
+
+def get_entry_columns_to_delete() -> List[str]:
+    return ["player_1_entry_ITF", "player_1_entry_UP",
+    "player_1_entry_W", "player_2_entry_ITF", "player_2_entry_UP",
+    "player_2_entry_W"]
+
+
+def get_player_numerical_columns_to_delete() -> List[str]:
+    return ["player_1_surface_elo", "player_2_surface_elo",
+            "player_1_elo", "player_2_elo", "player_1_age", "player_2_age",
+            "player_1_ht", "player_2_ht", "player_1_rank_points",
+            "player_2_rank_points", "player_1_rank", "player_2_rank",
+            "player_1_seed", "player_2_seed", "player_1_win_ratio",
+            "player_2_win_ratio", "player_1_h2h_won", "player_2_h2h_won",
+            "player_1_won_match", "player_2_won_match",
+            "player_1_total_match", "player_2_total_match"]
+
+
+def get_columns_with_last_n_matches_to_delete(
+        last_n_matches: List[int]) -> List[str]:
+    cols = []
+    cols.extend([f"player_1_last_{num}_win_ratio" for num in last_n_matches])
+    cols.extend([f"player_2_last_{num}_win_ratio" for num in last_n_matches])
+    cols.extend([f"player_1_last_{num}_match_won" for num in last_n_matches])
+    cols.extend([f"player_2_last_{num}_match_won" for num in last_n_matches])
+    return cols
+
+
+def delete_columns(df: DataFrame,
+                            last_n_matches: List[int]) -> DataFrame:
+    entry_columns = get_entry_columns_to_delete()
+    numerical_columns = get_player_numerical_columns_to_delete()
+    last_n_matches_columns = get_columns_with_last_n_matches_to_delete(
+        last_n_matches)
+
+
+    columns_to_remove = (["tourney_level_O"]  + ["player_1_id", "player_2_id"]
+            + ["player_1_surface_h2h_won", "player_2_surface_h2h_won"]
+                + entry_columns + numerical_columns + last_n_matches_columns)
+    df = df.drop(columns=[column for column in columns_to_remove], errors="ignore")
+    return df
 
 
 if __name__ == '__main__':
