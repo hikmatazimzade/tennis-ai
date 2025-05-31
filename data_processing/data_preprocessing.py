@@ -14,6 +14,7 @@ class CleanDf(ABC):
     def __init__(self, train_csv: str=TRAIN_CSV):
         self.df = pd.read_csv(train_csv)
         self.cleaning_steps = [
+            self.rename_player_columns,
             self.replace_hands,
             self.encode_tourney_date,
             self.apply_one_hot_encoding,
@@ -33,23 +34,29 @@ class CleanDf(ABC):
 
         return self.df
 
-    def drop_columns(self, column_names: Tuple[str]=(
-        "tourney_name", "tourney_id", "match_num", "winner_name", "loser_name",
-        "score", "best_of", "round", "minutes", "w_ace", "l_ace", "w_df",
-        "l_df", "w_svpt", "l_svpt", "w_1stIn", "l_1stIn", "w_1stWon",
-        "l_1stWon", "w_2ndWon", "l_2ndWon", "w_SvGms", "l_SvGms", "w_bpSaved",
-        "l_bpSaved", "w_bpFaced", "l_bpFaced", "Unnamed: 0", "loser_entry_S"
-    )) -> None:
-        dropped_columns = []
-        for column in column_names:
-            try:
-                self.df.drop(column, axis=1, inplace=True)
-                dropped_columns.append(column)
-            except Exception as column_drop_error:
-                logger.error("An error occurred when "
-                             f"dropping {column} -> {column_drop_error}")
+    def rename_player_columns(self) -> None:
+        self.df.columns = [
+            col.replace("w_", "winner_") if col.startswith("w_")
+            else col.replace("l_", "loser_") if col.startswith("l_")
+            else col
+            for col in self.df.columns
+        ]
 
-        logger.info(f"Columns successfully dropped -> {dropped_columns}")
+    def drop_columns(self, column_names: Tuple[str]=(
+        "tourney_name", "tourney_id", "match_num", "winner_name",
+        "loser_name", "score", "best_of", "round", "minutes",
+        "loser_entry_S", "Unnamed: 0"
+    )):
+            dropped_columns = []
+            for column in column_names:
+                try:
+                    self.df.drop(column, axis=1, inplace=True)
+                    dropped_columns.append(column)
+                except Exception as column_drop_error:
+                    logger.error("An error occurred when "
+                                 f"dropping {column} -> {column_drop_error}")
+
+            logger.info(f"Columns successfully dropped -> {dropped_columns}")
 
     def encode_tourney_date(self) -> None:
         self.df["tourney_date"] = pd.to_datetime(self.df
