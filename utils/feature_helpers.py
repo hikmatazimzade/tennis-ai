@@ -51,9 +51,9 @@ def increase_player_indexes(player_index_dict: Dict[int, List[int]],
 
 def get_new_surface_indexes(carpet_idx: int, clay_idx: int,grass_idx: int,
                 hard_idx: int, surface_idx: int) -> Tuple[int, int, int, int]:
-    if surface_idx == 1: carpet_idx += 1
-    elif surface_idx == 2: clay_idx += 1
-    if surface_idx == 3: grass_idx += 1
+    if surface_idx == 0: carpet_idx += 1
+    elif surface_idx == 1: clay_idx += 1
+    elif surface_idx == 2: grass_idx += 1
     else: hard_idx += 1
     return carpet_idx, clay_idx, grass_idx, hard_idx
 
