@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List, Dict
 from collections import defaultdict
 
 import pandas as pd
@@ -25,6 +25,37 @@ def get_surface_index(carpet: bool, clay: bool, grass: bool) -> int:
     if clay: return 1
     if grass: return 2
     else: return 3
+
+
+def increase_player_indexes(player_index_dict: Dict[int, List[int]],
+                       ply_1_id: int, ply_2_id: int,
+                       ply_1_list: List[int],ply_2_list: List[int],
+                       surface_idx: int) -> None:
+    carpet_idx_1, clay_idx_1, grass_idx_1, hard_idx_1 = ply_1_list[:4]
+    carpet_idx_2, clay_idx_2, grass_idx_2, hard_idx_2 = ply_2_list[:4]
+    total_idx_1, total_idx_2 = ply_1_list[4], ply_2_list[4]
+
+    carpet_idx_1, clay_idx_1, grass_idx_1, hard_idx_1 = (
+        get_new_surface_indexes(carpet_idx_1, clay_idx_1,
+                                grass_idx_1, hard_idx_1, surface_idx))
+
+    carpet_idx_2, clay_idx_2, grass_idx_2, hard_idx_2 = (
+        get_new_surface_indexes(carpet_idx_2, clay_idx_2,
+                                grass_idx_2, hard_idx_2, surface_idx))
+
+    player_index_dict[ply_1_id] = [carpet_idx_1, clay_idx_1,
+                                   grass_idx_1, hard_idx_1, total_idx_1 + 1]
+    player_index_dict[ply_2_id] = [carpet_idx_2, clay_idx_2,
+                                   grass_idx_2, hard_idx_2, total_idx_2 + 1]
+
+
+def get_new_surface_indexes(carpet_idx: int, clay_idx: int,grass_idx: int,
+                hard_idx: int, surface_idx: int) -> Tuple[int, int, int, int]:
+    if surface_idx == 1: carpet_idx += 1
+    elif surface_idx == 2: clay_idx += 1
+    if surface_idx == 3: grass_idx += 1
+    else: hard_idx += 1
+    return carpet_idx, clay_idx, grass_idx, hard_idx
 
 
 def get_surface_index_by_row(row: pd.DataFrame.itertuples) -> int:
