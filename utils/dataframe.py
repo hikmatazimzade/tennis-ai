@@ -16,14 +16,15 @@ from data_processing.feature_engineering import FeatureEngineeringDf
 logger = get_logger("utils.dataframe")
 
 
-def get_cleaner(model: str) -> Union[CleanRandomForestDf,
-                                    CleanXGBoostDf, CleanCatBoost]:
+def get_cleaner(model: str) -> Union[type[CleanRandomForestDf],
+                                    type[CleanXGBoostDf],
+                                    type[CleanCatBoost]]:
     if model == "random_forest":
-        return CleanRandomForestDf()
+        return CleanRandomForestDf
     elif model == "xgboost":
-        return CleanXGBoostDf()
+        return CleanXGBoostDf
     elif model == "catboost":
-        return CleanCatBoost()
+        return CleanCatBoost
 
 
 def get_final_path(model: str) -> str:
@@ -49,7 +50,7 @@ def read_final_csv(model: str) -> Optional[DataFrame]:
 
 
 def get_final_dataframe(model: str) -> DataFrame:
-    cleaner = get_cleaner(model)
+    cleaner = get_cleaner(model)()
     cleaner.clean()
     df = shuffle_winner_loser_data(cleaner.df)
 
@@ -149,17 +150,34 @@ def get_columns_with_last_n_matches_to_delete(
     return cols
 
 
+def get_in_game_columns_to_delete() -> List[str]:
+    column_suffixes = [
+            "_ace", "_df", "_svpt", "_1stIn",
+            "_1stWon", "_2ndWon", "_SvGms",
+            "_bpSaved", "_bpFaced"
+        ]
+
+    in_game_columns = []
+    for column in column_suffixes:
+        for player in ["player_1", "player_2"]:
+            in_game_columns.append(player + column)
+
+    return in_game_columns
+
+
 def delete_columns(df: DataFrame,
                             last_n_matches: List[int]) -> DataFrame:
     entry_columns = get_entry_columns_to_delete()
     numerical_columns = get_player_numerical_columns_to_delete()
+
+    in_game_columns = get_in_game_columns_to_delete()
     last_n_matches_columns = get_columns_with_last_n_matches_to_delete(
         last_n_matches)
 
-
     columns_to_remove = (["tourney_level_O"]  + ["player_1_id", "player_2_id"]
             + ["player_1_surface_h2h_won", "player_2_surface_h2h_won"]
-                + entry_columns + numerical_columns + last_n_matches_columns)
+                + entry_columns + numerical_columns + last_n_matches_columns
+                + in_game_columns)
     df = df.drop(columns=[column for column in columns_to_remove], errors="ignore")
     return df
 
