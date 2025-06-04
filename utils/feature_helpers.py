@@ -27,6 +27,15 @@ def get_surface_index(carpet: bool, clay: bool, grass: bool) -> int:
     else: return 3
 
 
+def get_in_game_data_by_row(row, column: str) -> Tuple[int, int]:
+    player_1_column  = f"player_1_{column}"
+    player_2_column = f"player_2_{column}"
+
+    player_1_val = getattr(row, player_1_column)
+    player_2_val = getattr(row, player_2_column)
+    return player_1_val, player_2_val
+
+
 def increase_player_indexes(player_index_dict: Dict[int, List[int]],
                        ply_1_id: int, ply_2_id: int,
                        ply_1_list: List[int],ply_2_list: List[int],
