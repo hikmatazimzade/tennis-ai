@@ -36,6 +36,11 @@ def get_in_game_data_by_row(row, column: str) -> Tuple[int, int]:
     return player_1_val, player_2_val
 
 
+def get_in_game_dict_over_surfaces() -> defaultdict:
+    base_dict = defaultdict(lambda: [[] for _ in range(4)])
+    return base_dict
+
+
 def increase_player_indexes(player_index_dict: Dict[int, List[int]],
                        ply_1_id: int, ply_2_id: int,
                        ply_1_list: List[int],ply_2_list: List[int],
