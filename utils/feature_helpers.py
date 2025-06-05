@@ -55,6 +55,18 @@ def get_in_game_dict_over_surfaces() -> defaultdict:
     return base_dict
 
 
+def get_last_n_lists(last_len: int) -> tuple[List[List], List[List]]:
+    last_n_1 = [[] for _ in range(last_len)]
+    last_n_2 = [[] for _ in range(last_len)]
+    return last_n_1, last_n_2
+
+
+def get_last_n_surface_lists(last_len: int) -> tuple[List[List], List[List]]:
+    last_n_surface_1 = [[] for _ in range(last_len)]
+    last_n_surface_2 = [[] for _ in range(last_len)]
+    return last_n_surface_1, last_n_surface_2
+
+
 def increase_player_indexes(player_index_dict: Dict[int, List[int]],
                        ply_1_id: int, ply_2_id: int,
                        ply_1_list: List[int],ply_2_list: List[int],
