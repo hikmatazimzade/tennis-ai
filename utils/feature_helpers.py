@@ -120,9 +120,8 @@ def append_last_n_lists(player_1_list: list, player_2_list: list,
 
 def bulk_add(df: pd.DataFrame,
              col_dict: dict[str, List[int]]) -> pd.DataFrame:
-    new_cols = pd.DataFrame(col_dict, index=df.index)
-    df = pd.concat([df, new_cols], axis=1, copy=False)
-    return df.copy()
+    df[list(col_dict.keys())] = pd.DataFrame(col_dict, index=df.index)
+    return df
 
 
 def increase_player_indexes(player_index_dict: Dict[int, List[int]],
