@@ -1,5 +1,6 @@
 from typing import Tuple, List, Dict
 from collections import defaultdict
+from enum import IntEnum, auto
 
 import pandas as pd
 
@@ -20,11 +21,23 @@ def get_elos(df: pd.DataFrame, K:int) -> Tuple[list, list]:
     return player_1_elos, player_2_elos
 
 
+class AutoZeroEnum(IntEnum):
+    def _generate_next_value_(name, start, count, last_values):
+        return count
+
+
+class Surface(AutoZeroEnum):
+    CARPET = auto()
+    CLAY = auto()
+    GRASS = auto()
+    HARD = auto()
+
+
 def get_surface_index(carpet: bool, clay: bool, grass: bool) -> int:
-    if carpet: return 0
-    if clay: return 1
-    if grass: return 2
-    else: return 3
+    if carpet: return Surface.CARPET.value
+    if clay: return Surface.CLAY.value
+    if grass: return Surface.GRASS.value
+    else: return Surface.HARD.value
 
 
 def get_in_game_data_by_row(row, column: str) -> Tuple[int, int]:
@@ -38,6 +51,7 @@ def get_in_game_data_by_row(row, column: str) -> Tuple[int, int]:
 
 def get_in_game_dict_over_surfaces() -> defaultdict:
     base_dict = defaultdict(lambda: [[] for _ in range(4)])
+    # {"player_id": [carpet_values], [clay_values].....}
     return base_dict
 
 
