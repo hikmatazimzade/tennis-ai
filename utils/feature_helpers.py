@@ -3,7 +3,6 @@ from collections import defaultdict
 from enum import IntEnum, auto
 
 import pandas as pd
-import numpy as np
 
 
 def get_elos(df: pd.DataFrame, K:int) -> Tuple[list, list]:
@@ -117,6 +116,13 @@ def append_last_n_lists(player_1_list: list, player_2_list: list,
     last_n.last_n_2[last].append(
         last_n_sum_2
     )
+
+
+def bulk_add(df: pd.DataFrame,
+             col_dict: dict[str, List[int]]) -> pd.DataFrame:
+    new_cols = pd.DataFrame(col_dict, index=df.index)
+    df = pd.concat([df, new_cols], axis=1, copy=False)
+    return df.copy()
 
 
 def increase_player_indexes(player_index_dict: Dict[int, List[int]],
