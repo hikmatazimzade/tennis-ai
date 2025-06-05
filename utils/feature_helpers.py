@@ -3,6 +3,7 @@ from collections import defaultdict
 from enum import IntEnum, auto
 
 import pandas as pd
+import numpy as np
 
 
 def get_elos(df: pd.DataFrame, K:int) -> Tuple[list, list]:
@@ -83,6 +84,39 @@ def get_last_n_sum(last: int,
             last_n_sum += ply[last][curr_ply_index]
 
     return last_n_sum
+
+
+class LastN:
+    def __init__(self, last_len: int):
+        self.last_n_1, self.last_n_2 = get_last_n_lists(last_len)
+        self.last_n_surface_1, self.last_n_surface_2 = (
+            get_last_n_surface_lists(last_len))
+
+
+def append_last_n_lists(player_1_list: list, player_2_list: list,
+                    last_n: LastN, last: int, ply_1_index_list: List[int],
+                    ply_2_index_list: List[int], surface_idx: int,
+                    curr_surface_index_1: int, curr_surface_index_2: int):
+    last_n_sum_1 = get_last_n_sum(last, player_1_list,
+                                  ply_1_index_list)
+    last_n_sum_2 = get_last_n_sum(last, player_2_list,
+                                  ply_2_index_list)
+
+    last_n.last_n_surface_1[last].append(
+        player_1_list[surface_idx][last][curr_surface_index_1]
+    )
+
+    last_n.last_n_surface_2[last].append(
+        player_2_list[surface_idx][last][curr_surface_index_2]
+    )
+
+    last_n.last_n_1[last].append(
+        last_n_sum_1
+    )
+
+    last_n.last_n_2[last].append(
+        last_n_sum_2
+    )
 
 
 def increase_player_indexes(player_index_dict: Dict[int, List[int]],
