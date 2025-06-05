@@ -151,18 +151,21 @@ def get_columns_with_last_n_matches_to_delete(
 
 
 def get_in_game_columns_to_delete() -> List[str]:
-    column_suffixes = [
-            "_ace", "_df", "_svpt", "_1stIn",
-            "_1stWon", "_2ndWon", "_SvGms",
-            "_bpSaved", "_bpFaced"
+    in_game_columns = [
+            "ace", "df", "svpt", "1stIn",
+            "1stWon", "2ndWon", "SvGms",
+            "bpSaved", "bpFaced"
         ]
 
-    in_game_columns = []
-    for column in column_suffixes:
+    columns_to_delete = []
+    for game_column in in_game_columns:
         for player in ["player_1", "player_2"]:
-            in_game_columns.append(player + column)
+            columns_to_delete.append(f"{player}_{game_column}")
+            for last in (5, 10, 20, 50):
+                columns_to_delete.append(f"{player}_{game_column}_last_{last}")
+                columns_to_delete.append(f"{player}_{game_column}_last_{last}_surface")
 
-    return in_game_columns
+    return columns_to_delete
 
 
 def delete_columns(df: DataFrame,
@@ -183,7 +186,7 @@ def delete_columns(df: DataFrame,
 
 
 if __name__ == '__main__':
-    models = ("random_forest", "xgboost", "catboost")
+    models = ("random_forest", "catboost", "xgboost")
     for model in models:
         save_final_dataframe(model)
 
