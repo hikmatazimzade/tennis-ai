@@ -67,6 +67,24 @@ def get_last_n_surface_lists(last_len: int) -> tuple[List[List], List[List]]:
     return last_n_surface_1, last_n_surface_2
 
 
+def get_last_n_sum(last: int,
+            player_list: List[List[List[int]]],
+            ply_index_list: List[int]):
+    last_n_sum = 0
+    for ply_idx, ply in enumerate(player_list):
+        curr_ply_index = ply_index_list[ply_idx]
+        if len(ply[last]) == 0:
+            continue
+
+        elif len(ply[last]) == curr_ply_index:
+            last_n_sum += ply[last][-1]
+
+        else:
+            last_n_sum += ply[last][curr_ply_index]
+
+    return last_n_sum
+
+
 def increase_player_indexes(player_index_dict: Dict[int, List[int]],
                        ply_1_id: int, ply_2_id: int,
                        ply_1_list: List[int],ply_2_list: List[int],
