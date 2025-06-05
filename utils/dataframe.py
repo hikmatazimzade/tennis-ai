@@ -155,15 +155,17 @@ def get_in_game_columns_to_delete() -> List[str]:
             "ace", "df", "svpt", "1stIn",
             "1stWon", "2ndWon", "SvGms",
             "bpSaved", "bpFaced"
-        ]
+    ]
 
     columns_to_delete = []
     for game_column in in_game_columns:
         for player in ["player_1", "player_2"]:
             columns_to_delete.append(f"{player}_{game_column}")
             for last in (5, 10, 20, 50):
-                columns_to_delete.append(f"{player}_{game_column}_last_{last}")
-                columns_to_delete.append(f"{player}_{game_column}_last_{last}_surface")
+                columns_to_delete.append(f"{player}_{game_column}_"
+                                         f"last_{last}")
+                columns_to_delete.append(f"{player}_{game_column}_"
+                                         f"last_{last}_surface")
 
     return columns_to_delete
 
@@ -181,7 +183,8 @@ def delete_columns(df: DataFrame,
             + ["player_1_surface_h2h_won", "player_2_surface_h2h_won"]
                 + entry_columns + numerical_columns + last_n_matches_columns
                 + in_game_columns)
-    df = df.drop(columns=[column for column in columns_to_remove], errors="ignore")
+    df = df.drop(columns=[column for column in columns_to_remove],
+                 errors="ignore")
     return df
 
 
