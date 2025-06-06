@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import List
 
 import numpy as np
-import pandas as pd
 
 from utils.logger import get_logger
 from utils.feature_helpers import *
@@ -88,7 +86,7 @@ class InGameDataEngineering(FeatureEngineeringBase):
         self.df = bulk_add(self.df, col_dict)
 
     def get_final_player_dict_over_different_surfaces(self,
-                            game_column: str) -> Dict[int, List[List[int]]]:
+                            game_column: str) -> Dict[int, List[List]]:
         player_dict_over_surfaces = get_in_game_dict_over_surfaces()
         self.append_player_dict_over_surfaces(game_column,
                                               player_dict_over_surfaces)
@@ -126,14 +124,14 @@ class InGameDataEngineering(FeatureEngineeringBase):
                 player_2_val)
 
     def get_final_in_game_dict(self, game_column: str) -> dict:
-        player_dict_over_surfaces = get_in_game_dict_over_surfaces()
-        self.append_player_dict_over_surfaces(game_column,
-                                              player_dict_over_surfaces)
+        player_dict_over_surfaces = (
+              self.get_final_player_dict_over_different_surfaces(game_column))
 
         in_game_dict = self.get_in_game_dict(player_dict_over_surfaces)
         return in_game_dict
 
-    def get_in_game_dict(self, player_dict: Dict[List, List]) -> dict:
+    def get_in_game_dict(self,
+                    player_dict: Dict[int, List[List[int]]]) -> dict:
         in_game_dict = {}
         for player_id in player_dict:
             player_list, total_in_game_list = (
