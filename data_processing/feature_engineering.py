@@ -69,13 +69,18 @@ class InGameDataEngineering(FeatureEngineeringBase):
                                         ply_1_index_list,
                                         ply_2_index_list, surface_idx)
 
-            cols = self.get_in_game_columns_dict(game_column, last_n.last_n_1,
-                            last_n.last_n_2, last_n.last_n_surface_1,
-                            last_n.last_n_surface_2, total_val_list_1,
-                            total_val_list_2)
-            col_dict.update(cols)
+            self.update_cols(game_column, last_n, total_val_list_1,
+                             total_val_list_2, col_dict)
 
         self.df = bulk_add(self.df, col_dict)
+
+    def update_cols(self, game_column: str, last_n: LastN,
+            total_val_list_1: List[int], total_val_list_2: List[int],
+            col_dict: dict) -> None:
+        cols = self.get_in_game_columns_dict(game_column, last_n.last_n_1,
+                                             last_n.last_n_2, last_n.last_n_surface_1,
+                                             last_n.last_n_surface_2, total_val_list_1, total_val_list_2)
+        col_dict.update(cols)
 
     def get_in_game_columns_dict(self, game_column: str,
                                  last_n_1: List[List[int]], last_n_2: List[List[int]],
