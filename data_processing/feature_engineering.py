@@ -33,6 +33,7 @@ class InGameDataEngineering(FeatureEngineeringBase):
         return self.df
 
     def add_in_game_data(self) -> None:
+        col_dict = {}
         for game_column in self.in_game_columns:
             in_game_dict = self.get_final_in_game_dict(game_column)
 
@@ -75,10 +76,36 @@ class InGameDataEngineering(FeatureEngineeringBase):
                                         ply_1_index_list,
                                         ply_2_index_list, surface_idx)
 
-            self.set_in_game_data(game_column, last_n.last_n_1,
+            cols = self.get_in_game_columns_dict(game_column, last_n.last_n_1,
                             last_n.last_n_2, last_n.last_n_surface_1,
                             last_n.last_n_surface_2, total_val_list_1,
                             total_val_list_2)
+            col_dict.update(cols)
+
+        self.df = bulk_add(self.df, col_dict)
+
+    def get_in_game_columns_dict(self, game_column: str,
+                                 last_n_1: List[List[int]], last_n_2: List[List[int]],
+                                 last_n_surface_1: List[List[int]], last_n_surface_2: List[List[int]],
+                                 total_val_list_1: List[int], total_val_list_2: List[int]) -> dict:
+        cols = {}
+
+        cols.update({
+            f"player_1_{game_column}_total": total_val_list_1,
+            f"player_2_{game_column}_total": total_val_list_2
+        })
+
+        for last_idx, last in enumerate(self.last_n_matches):
+            cols.update({
+                f"player_1_{game_column}_last_{last}_"
+                f"surface": last_n_surface_1[last_idx],
+                f"player_2_{game_column}_last_{last}_"
+                f"surface": last_n_surface_2[last_idx],
+                f"player_1_{game_column}_last_{last}": last_n_1[last_idx],
+                f"player_2_{game_column}_last_{last}": last_n_2[last_idx]
+            })
+
+        return cols
 
     def add_in_game_diff(self) -> None:
         col_dict = {}
