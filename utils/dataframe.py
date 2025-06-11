@@ -161,6 +161,8 @@ def get_in_game_columns_to_delete() -> List[str]:
     for game_column in in_game_columns:
         for player in ["player_1", "player_2"]:
             columns_to_delete.append(f"{player}_{game_column}")
+            columns_to_delete.append(f"{player}_{game_column}_total")
+
             for last in (5, 10, 20, 50):
                 columns_to_delete.append(f"{player}_{game_column}_"
                                          f"last_{last}")
