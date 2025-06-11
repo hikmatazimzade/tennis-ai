@@ -137,30 +137,6 @@ class InGameDataEngineering(FeatureEngineeringBase):
                                               player_dict_over_surfaces)
         return player_dict_over_surfaces
 
-    def set_in_game_data(self, game_column:str, last_n_1: List[List[int]],
-                last_n_2: List[List[int]], last_n_surface_1: List[List[int]],
-                last_n_surface_2: List[List[int]],
-                total_val_list_1: List[int],
-                total_val_list_2: List[int]):
-        cols = {}
-        cols.update({
-            f"player_1_{game_column}_total": total_val_list_1,
-            f"player_2_{game_column}_total": total_val_list_2
-        })
-
-        for last_idx, last in enumerate(self.last_n_matches):
-            cols.update({
-                f"player_1_{game_column}_last_{last}_"
-                f"surface": last_n_surface_1[last_idx],
-                f"player_2_{game_column}_last_{last}_"
-                f"surface": last_n_surface_2[last_idx],
-                f"player_1_{game_column}_last_{last}": last_n_1[last_idx],
-                f"player_2_{game_column}_last_{last}": last_n_2[last_idx]
-            })
-
-        self.df = bulk_add(self.df, cols)
-        logger.info(f"Added {game_column} column to the dataframe!")
-
     def append_player_dict_over_surfaces(self, game_column: str,
                         player_dict_over_surfaces: defaultdict) -> None:
         for row in self.df.itertuples():
