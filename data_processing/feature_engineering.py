@@ -49,15 +49,8 @@ class InGameDataEngineering(FeatureEngineeringBase):
                 ply_1_index_list = player_index_dict[ply_1_id]
                 ply_2_index_list = player_index_dict[ply_2_id]
 
-                player_1_val, player_2_val = get_in_game_data_by_row(row,
-                                                                     game_column)
-
-                total_val_list_1.append(player_total_val_dict[ply_1_id])
-                total_val_list_2.append(player_total_val_dict[ply_2_id])
-
-                player_total_val_dict[ply_1_id] += player_1_val
-                player_total_val_dict[ply_2_id] += player_2_val
-
+                handle_in_game_values(row, game_column, total_val_list_1,
+                  total_val_list_2, ply_1_id, ply_2_id, player_total_val_dict)
                 surface_idx = get_surface_index_by_row(row)
 
                 player_1_list = in_game_dict[ply_1_id]
@@ -173,7 +166,7 @@ class InGameDataEngineering(FeatureEngineeringBase):
                                  ) -> List[List[List[int]]]:
         player_in_game_list = [[[] for _ in
                     range(len(self.last_n_matches))] for _ in range(4)]
-        # inside every surface list, there are last n matches data
+        # Inside every surface list, there are last n matches data
 
         for surface_idx, surface_data in enumerate(curr_in_game):
             curr_len = len(surface_data)

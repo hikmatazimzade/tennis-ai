@@ -1,4 +1,4 @@
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, Any
 from collections import defaultdict
 from enum import IntEnum, auto
 
@@ -53,6 +53,20 @@ def get_in_game_dict_over_surfaces() -> defaultdict:
     base_dict = defaultdict(lambda: [[] for _ in range(4)])
     # {"player_id": [carpet_values], [clay_values].....}
     return base_dict
+
+
+def handle_in_game_values(row: tuple[Any, ...], game_column: str,
+            total_val_list_1: List[int], total_val_list_2: List[int],
+            ply_1_id: int, ply_2_id: int,
+            player_total_val_dict: defaultdict) -> None:
+    player_1_val, player_2_val = get_in_game_data_by_row(row,
+                                                         game_column)
+
+    total_val_list_1.append(player_total_val_dict[ply_1_id])
+    total_val_list_2.append(player_total_val_dict[ply_2_id])
+
+    player_total_val_dict[ply_1_id] += player_1_val
+    player_total_val_dict[ply_2_id] += player_2_val
 
 
 def get_last_n_lists(last_len: int) -> tuple[List[List], List[List]]:
