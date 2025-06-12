@@ -35,51 +35,72 @@ class InGameDataEngineering(FeatureEngineeringBase):
     def add_in_game_data(self) -> None:
         col_dict = {}
         for game_column in self.in_game_columns:
-            in_game_dict = self.get_final_in_game_dict(game_column)
-
-            player_index_dict = defaultdict(lambda: 5 * [0])
-            last_len = len(self.last_n_matches)
-
-            last_n = LastN(last_len)
-            player_total_val_dict = defaultdict(int)
-            total_val_list_1, total_val_list_2 = [], []
-
-            for row in self.df.itertuples():
-                ply_1_id, ply_2_id = row.player_1_id, row.player_2_id
-                ply_1_index_list = player_index_dict[ply_1_id]
-                ply_2_index_list = player_index_dict[ply_2_id]
-
-                handle_in_game_values(row, game_column, total_val_list_1,
-                  total_val_list_2, ply_1_id, ply_2_id, player_total_val_dict)
-                surface_idx = get_surface_index_by_row(row)
-
-                player_1_list = in_game_dict[ply_1_id]
-                player_2_list = in_game_dict[ply_2_id]
-
-                curr_surface_index_1 = ply_1_index_list[surface_idx]
-                curr_surface_index_2 = ply_2_index_list[surface_idx]
-
-                for last in range(last_len):
-                    append_last_n_lists(player_1_list, player_2_list, last_n,
-                            last, ply_1_index_list, ply_2_index_list,
-                            surface_idx, curr_surface_index_1,
-                            curr_surface_index_2)
-
-                increase_player_indexes(player_index_dict, ply_1_id, ply_2_id,
-                                        ply_1_index_list,
-                                        ply_2_index_list, surface_idx)
-
-            self.update_cols(game_column, last_n, total_val_list_1,
-                             total_val_list_2, col_dict)
+            self.process_game_column(game_column, col_dict)
 
         self.df = bulk_add(self.df, col_dict)
+
+    def process_game_column(self, game_column: str, col_dict: dict) -> None:
+        in_game_dict = self.get_final_in_game_dict(game_column)
+        player_index_dict = defaultdict(lambda: 5 * [0])
+
+        last_len = len(self.last_n_matches)
+        last_n = LastN(last_len)
+
+        player_total_val_dict = defaultdict(int)
+        total_val_list_1, total_val_list_2 = [], []
+
+        self.iterate_rows_and_build_features(game_column, in_game_dict,
+                    player_index_dict, last_n, player_total_val_dict,
+                    total_val_list_1, total_val_list_2)
+
+        self.update_cols(game_column, last_n,
+                    total_val_list_1, total_val_list_2, col_dict)
+ 
+    def iterate_rows_and_build_features(self, game_column: str,
+            in_game_dict: dict, player_index_dict: defaultdict, last_n: LastN,
+            player_total_val_dict: defaultdict, total_val_list_1: List[int],
+            total_val_list_2: List[int]) -> None:
+        for row in self.df.itertuples():
+            ply_1_id, ply_2_id = row.player_1_id, row.player_2_id
+            ply_1_index_list = player_index_dict[ply_1_id]
+            ply_2_index_list = player_index_dict[ply_2_id]
+
+            handle_in_game_values(row, game_column, total_val_list_1,
+                  total_val_list_2, ply_1_id, ply_2_id, player_total_val_dict)
+
+            surface_idx = get_surface_index_by_row(row)
+            player_1_list = in_game_dict[ply_1_id]
+            player_2_list = in_game_dict[ply_2_id]
+
+            curr_surface_index_1 = ply_1_index_list[surface_idx]
+            curr_surface_index_2 = ply_2_index_list[surface_idx]
+
+            self.process_time_windows(
+                player_1_list, player_2_list, last_n,
+                ply_1_index_list, ply_2_index_list, surface_idx,
+                curr_surface_index_1, curr_surface_index_2
+            )
+
+            increase_player_indexes(player_index_dict, ply_1_id, ply_2_id,
+                            ply_1_index_list, ply_2_index_list, surface_idx)
+
+    def process_time_windows(self, player_1_list: list, player_2_list: list,
+            last_n: LastN, ply_1_index_list: list, ply_2_index_list: list,
+            surface_idx: int, curr_surface_index_1: int,
+                              curr_surface_index_2: int) -> None:
+        last_len = len(self.last_n_matches)
+        for last in range(last_len):
+            append_last_n_lists(player_1_list, player_2_list, last_n, last,
+                    ply_1_index_list, ply_2_index_list, surface_idx,
+                    curr_surface_index_1, curr_surface_index_2)
 
     def update_cols(self, game_column: str, last_n: LastN,
             total_val_list_1: List[int], total_val_list_2: List[int],
             col_dict: dict) -> None:
         cols = self.get_in_game_columns_dict(game_column, last_n.last_n_1,
-                                             last_n.last_n_2, last_n.last_n_surface_1,
-                                             last_n.last_n_surface_2, total_val_list_1, total_val_list_2)
+                    last_n.last_n_2, last_n.last_n_surface_1,
+                    last_n.last_n_surface_2, total_val_list_1,
+                    total_val_list_2)
         col_dict.update(cols)
 
     def get_in_game_columns_dict(self, game_column: str,
@@ -159,6 +180,7 @@ class InGameDataEngineering(FeatureEngineeringBase):
     def get_in_game_dict(self,
                     player_dict: Dict[int, List[List[int]]]) -> dict:
         in_game_dict = {}
+
         for player_id in player_dict:
             player_list = (
                     self.get_player_in_game_lists(player_dict[player_id])
