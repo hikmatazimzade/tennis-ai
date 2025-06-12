@@ -5,7 +5,7 @@ from enum import IntEnum, auto
 import pandas as pd
 
 
-def get_elos(df: pd.DataFrame, K:int) -> Tuple[list, list]:
+def get_elos(df: pd.DataFrame, K: int) -> Tuple[list, list]:
     elo_rating = defaultdict(lambda: 1500)
     player_1_elos = []
     player_2_elos = []
@@ -55,7 +55,7 @@ def get_in_game_dict_over_surfaces() -> defaultdict:
     return base_dict
 
 
-def handle_in_game_values(row: tuple[Any, ...], game_column: str,
+def handle_total_values(row: Tuple[Any, ...], game_column: str,
             total_val_list_1: List[int], total_val_list_2: List[int],
             ply_1_id: int, ply_2_id: int,
             player_total_val_dict: defaultdict) -> None:
@@ -176,8 +176,9 @@ def get_surface_index_by_row(row: pd.DataFrame.itertuples) -> int:
     return surface_idx
 
 
-def append_surface_elos(player_1_elos: list, player_2_elos: list, player_1_id: int,
-                player_2_id: int, elo_rating, surface_idx: int) -> None:
+def append_surface_elos(player_1_elos: list, player_2_elos: list,
+                player_1_id: int, player_2_id: int,
+                elo_rating, surface_idx: int) -> None:
     player_1_elos.append(elo_rating[player_1_id][surface_idx])
     player_2_elos.append(elo_rating[player_2_id][surface_idx])
 
@@ -187,12 +188,16 @@ def update_surface_elo(elo_rating: dict, player_1_won: bool, K: int,
     actual_score_1 = 1 if player_1_won else 0
     actual_score_2 = 1 - actual_score_1
 
-    expected_score_1 = get_expected_score(elo_rating[player_1_id][surface_idx],
-                                          elo_rating[player_2_id][surface_idx])
+    expected_score_1 = get_expected_score(
+        elo_rating[player_1_id] [surface_idx],
+        elo_rating[player_2_id][surface_idx]
+    )
     expected_score_2 = 1 - expected_score_1
 
-    elo_rating[player_1_id][surface_idx] += K * (actual_score_1 - expected_score_1)
-    elo_rating[player_2_id][surface_idx] += K * (actual_score_2 - expected_score_2)
+    elo_rating[player_1_id][surface_idx] += K * (actual_score_1
+                                                 - expected_score_1)
+    elo_rating[player_2_id][surface_idx] += K * (actual_score_2
+                                                 - expected_score_2)
 
 
 def get_surface_elos(df: pd.DataFrame, K: int) -> Tuple[list, list]:

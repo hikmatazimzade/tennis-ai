@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
+from typing import Tuple, List, Dict
 
 import numpy as np
+import pandas as pd
 
 from utils.logger import get_logger
 from utils.feature_helpers import *
@@ -18,7 +20,7 @@ class FeatureEngineeringBase(ABC):
 
 
 class InGameDataEngineering(FeatureEngineeringBase):
-    def __init__(self, df: pd.DataFrame, last_n_matches: tuple):
+    def __init__(self, df: pd.DataFrame, last_n_matches: Tuple[int]):
         super().__init__(df)
         self.last_n_matches = last_n_matches
         self.in_game_columns = (
@@ -36,6 +38,29 @@ class InGameDataEngineering(FeatureEngineeringBase):
         col_dict = {}
         for game_column in self.in_game_columns:
             self.process_game_column(game_column, col_dict)
+
+        self.df = bulk_add(self.df, col_dict)
+
+    def add_in_game_diff(self) -> None:
+        col_dict = {}
+
+        for game_column in self.in_game_columns:
+            col_dict[f"{game_column}_total_diff"] = (
+                self.df[f"player_1_{game_column}_total"]
+                - self.df[f"player_2_{game_column}_total"]
+            )
+
+            for last in self.last_n_matches:
+                col_dict[f"{game_column}_last_{last}_surface_diff"] = (
+                        self.df[f"player_1_{game_column}_"
+                                f"last_{last}_surface"]
+                        - self.df[f"player_2_{game_column}"
+                                  f"_last_{last}_surface"]
+                )
+                col_dict[f"{game_column}_last_{last}_diff"] = (
+                        self.df[f"player_1_{game_column}_last_{last}"]
+                        - self.df[f"player_2_{game_column}_last_{last}"]
+                )
 
         self.df = bulk_add(self.df, col_dict)
 
@@ -65,7 +90,7 @@ class InGameDataEngineering(FeatureEngineeringBase):
             ply_1_index_list = player_index_dict[ply_1_id]
             ply_2_index_list = player_index_dict[ply_2_id]
 
-            handle_in_game_values(row, game_column, total_val_list_1,
+            handle_total_values(row, game_column, total_val_list_1,
                   total_val_list_2, ply_1_id, ply_2_id, player_total_val_dict)
 
             surface_idx = get_surface_index_by_row(row)
@@ -85,10 +110,11 @@ class InGameDataEngineering(FeatureEngineeringBase):
                             ply_1_index_list, ply_2_index_list, surface_idx)
 
     def process_time_windows(self, player_1_list: list, player_2_list: list,
-            last_n: LastN, ply_1_index_list: list, ply_2_index_list: list,
-            surface_idx: int, curr_surface_index_1: int,
-                              curr_surface_index_2: int) -> None:
+            last_n: LastN, ply_1_index_list: List[int],
+            ply_2_index_list: List[int], surface_idx: int,
+            curr_surface_index_1: int, curr_surface_index_2: int) -> None:
         last_len = len(self.last_n_matches)
+
         for last in range(last_len):
             append_last_n_lists(player_1_list, player_2_list, last_n, last,
                     ply_1_index_list, ply_2_index_list, surface_idx,
@@ -101,12 +127,13 @@ class InGameDataEngineering(FeatureEngineeringBase):
                     last_n.last_n_2, last_n.last_n_surface_1,
                     last_n.last_n_surface_2, total_val_list_1,
                     total_val_list_2)
+
         col_dict.update(cols)
 
     def get_in_game_columns_dict(self, game_column: str,
-                                 last_n_1: List[List[int]], last_n_2: List[List[int]],
-                                 last_n_surface_1: List[List[int]], last_n_surface_2: List[List[int]],
-                                 total_val_list_1: List[int], total_val_list_2: List[int]) -> dict:
+        last_n_1: List[List[int]], last_n_2: List[List[int]],
+        last_n_surface_1: List[List[int]], last_n_surface_2: List[List[int]],
+        total_val_list_1: List[int], total_val_list_2: List[int]) -> dict:
         cols = {}
 
         cols.update({
@@ -125,29 +152,6 @@ class InGameDataEngineering(FeatureEngineeringBase):
             })
 
         return cols
-
-    def add_in_game_diff(self) -> None:
-        col_dict = {}
-
-        for game_column in self.in_game_columns:
-            col_dict[f"{game_column}_total_diff"] = (
-                self.df[f"player_1_{game_column}_total"]
-                - self.df[f"player_2_{game_column}_total"]
-            )
-
-            for last in self.last_n_matches:
-                col_dict[f"{game_column}_last_{last}_surface_diff"] = (
-                        self.df[f"player_1_{game_column}_"
-                                f"last_{last}_surface"]
-                        - self.df[f"player_2_{game_column}"
-                                  f"_last_{last}_surface"]
-                )
-                col_dict[f"{game_column}_last_{last}_diff"] = (
-                        self.df[f"player_1_{game_column}_last_{last}"]
-                        - self.df[f"player_2_{game_column}_last_{last}"]
-                )
-
-        self.df = bulk_add(self.df, col_dict)
 
     def get_final_player_dict_over_different_surfaces(self,
                             game_column: str) -> Dict[int, List[List]]:
@@ -566,12 +570,12 @@ class EloEngineering(FeatureEngineeringBase):
                 player_1_history = players_elo_history[player_1_id]
                 player_2_history = players_elo_history[player_2_id]
 
-                self.set_players_elo_progress(players_elo_history, player_1_history,
-                    player_2_history, last_n,
+                self.set_players_elo_progress(players_elo_history,
+                    player_1_history, player_2_history, last_n,
                     player_1_id, player_2_id, row_idx)
 
             append_players_elo_progress(players_elo_history, player_1_id,
-                                        player_2_id, player_1_elo, player_2_elo)
+                                    player_2_id, player_1_elo, player_2_elo)
 
     def set_players_elo_progress(self, players_elo_history: defaultdict,
                 player_1_history: List[float], player_2_history: List[float],
