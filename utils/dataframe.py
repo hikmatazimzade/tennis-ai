@@ -181,7 +181,8 @@ def delete_columns(df: DataFrame,
     last_n_matches_columns = get_columns_with_last_n_matches_to_delete(
         last_n_matches)
 
-    columns_to_remove = (["tourney_level_O"]  + ["player_1_id", "player_2_id"]
+    columns_to_remove = (["Unnamed: 0", "tourney_level_O"]
+                + ["player_1_id", "player_2_id"]
             + ["player_1_surface_h2h_won", "player_2_surface_h2h_won"]
                 + entry_columns + numerical_columns + last_n_matches_columns
                 + in_game_columns)
