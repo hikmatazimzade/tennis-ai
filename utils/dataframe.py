@@ -1,5 +1,5 @@
 import os
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Tuple
 from secrets import choice
 
 import pandas as pd
@@ -172,10 +172,21 @@ def get_in_game_columns_to_delete() -> List[str]:
     return columns_to_delete
 
 
+def get_elo_progress_columns(last_n_matches: Tuple[int, ...]=
+        (5, 10, 20, 50)) -> List[str]:
+    elo_progress_columns = []
+    for last in last_n_matches:
+        elo_progress_columns.append(f"player_1_last_{last}_elo_progress")
+        elo_progress_columns.append(f"player_2_last_{last}_elo_progress")
+
+    return elo_progress_columns
+
+
 def delete_columns(df: DataFrame,
                             last_n_matches: List[int]) -> DataFrame:
     entry_columns = get_entry_columns_to_delete()
     numerical_columns = get_player_numerical_columns_to_delete()
+    elo_progress_columns = get_elo_progress_columns()
 
     in_game_columns = get_in_game_columns_to_delete()
     last_n_matches_columns = get_columns_with_last_n_matches_to_delete(
@@ -188,7 +199,7 @@ def delete_columns(df: DataFrame,
                 + ["player_1_id", "player_2_id"]
             + ["player_1_surface_h2h_won", "player_2_surface_h2h_won"]
                 + entry_columns + numerical_columns + last_n_matches_columns
-                + in_game_columns)
+                + in_game_columns + elo_progress_columns)
     df = df.drop(columns=[column for column in columns_to_remove],
                  errors="ignore")
     return df
