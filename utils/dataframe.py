@@ -150,7 +150,7 @@ def get_columns_with_last_n_matches_to_delete(
     return cols
 
 
-def get_in_game_columns_to_delete() -> List[str]:
+def get_in_game_columns_to_delete(last_n_matches: List[int]) -> List[str]:
     in_game_columns = [
             "ace", "df", "svpt", "1stIn",
             "1stWon", "2ndWon", "SvGms",
@@ -163,7 +163,7 @@ def get_in_game_columns_to_delete() -> List[str]:
             columns_to_delete.append(f"{player}_{game_column}")
             columns_to_delete.append(f"{player}_{game_column}_total")
 
-            for last in (5, 10, 20, 50):
+            for last in last_n_matches:
                 columns_to_delete.append(f"{player}_{game_column}_"
                                          f"last_{last}")
                 columns_to_delete.append(f"{player}_{game_column}_"
@@ -172,8 +172,7 @@ def get_in_game_columns_to_delete() -> List[str]:
     return columns_to_delete
 
 
-def get_elo_progress_columns(last_n_matches: Tuple[int, ...]=
-        (5, 10, 20, 50)) -> List[str]:
+def get_elo_progress_columns(last_n_matches: List[int]) -> List[str]:
     elo_progress_columns = []
     for last in last_n_matches:
         elo_progress_columns.append(f"player_1_last_{last}_elo_progress")
@@ -186,9 +185,9 @@ def delete_columns(df: DataFrame,
                             last_n_matches: List[int]) -> DataFrame:
     entry_columns = get_entry_columns_to_delete()
     numerical_columns = get_player_numerical_columns_to_delete()
-    elo_progress_columns = get_elo_progress_columns()
+    elo_progress_columns = get_elo_progress_columns(last_n_matches)
 
-    in_game_columns = get_in_game_columns_to_delete()
+    in_game_columns = get_in_game_columns_to_delete(last_n_matches)
     last_n_matches_columns = get_columns_with_last_n_matches_to_delete(
         last_n_matches)
 
