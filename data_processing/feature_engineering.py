@@ -531,6 +531,7 @@ class EloEngineering(FeatureEngineeringBase):
 
         self.add_elo_progress_column()
         self.add_last_matches_elo_progress()
+        self.add_last_matches_elo_progress_diff()
 
     def add_elo(self) -> None:
         player_1_elos, player_2_elos = get_elos(self.df, self.K)
@@ -576,6 +577,13 @@ class EloEngineering(FeatureEngineeringBase):
 
             append_players_elo_progress(players_elo_history, player_1_id,
                                     player_2_id, player_1_elo, player_2_elo)
+
+    def add_last_matches_elo_progress_diff(self):
+        for last in self.last_n_matches:
+            self.df[f"last_{last}_elo_progress_diff"] = (
+                    self.df[f"player_1_last_{last}_elo_progress"]
+                    - self.df[f"player_2_last_{last}_elo_progress"]
+            )
 
     def set_players_elo_progress(self, players_elo_history: defaultdict,
                 player_1_history: List[float], player_2_history: List[float],
