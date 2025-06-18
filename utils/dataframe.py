@@ -23,7 +23,7 @@ def get_cleaner(model: str) -> Union[type[CleanRandomForestDf],
         return CleanRandomForestDf
     elif model == "xgboost":
         return CleanXGBoostDf
-    elif model == "catboost":
+    else:
         return CleanCatBoost
 
 
@@ -195,9 +195,10 @@ def delete_columns(df: DataFrame,
 
 
 if __name__ == '__main__':
-    models = ("random_forest", "catboost", "xgboost")
-    for model in models:
-        save_final_dataframe(model)
+    save_final_dataframe("boosting_model")
+    # models = ("random_forest", "catboost", "xgboost")
+    # for model in models:
+    #     save_final_dataframe(model)
 
     # df = get_final_dataframe("random_forest")
     # print(df.columns)
