@@ -38,7 +38,8 @@ def save_final_dataframe(model: str) -> None:
     final_path = get_final_path(model)
 
     logger.info(f"Successfully saved {model} model to {final_path}!")
-    final_dataframe.to_csv(final_path)
+    final_dataframe = reorder_dataframe(final_dataframe)
+    final_dataframe.to_csv(final_path, index=False)
 
 
 def read_final_csv(model: str) -> Optional[DataFrame]:
@@ -201,6 +202,35 @@ def delete_columns(df: DataFrame,
                 + in_game_columns + elo_progress_columns)
     df = df.drop(columns=[column for column in columns_to_remove],
                  errors="ignore")
+    return df
+
+
+def reorder_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    all_cols = df.columns.tolist()
+
+    player_1_cols = [col for col in all_cols if col.startswith('player_1')
+                     and col != 'player_1_won']
+    player_2_cols = [col for col in all_cols if col.startswith('player_2')]
+
+    date_cols = ['tourney_year', 'tourney_month', 'tourney_day']
+
+    surface_cols = [col for col in all_cols if col.startswith("surface_")]
+    tourney_level_cols = [col for col in all_cols
+                          if col.startswith("tourney_level_")]
+
+    diff_cols = [col for col in all_cols if col.endswith('_diff') and
+                 col not in surface_cols]
+
+    specified_cols = (player_1_cols + player_2_cols
+        + date_cols + surface_cols + tourney_level_cols
+        + diff_cols)
+
+    rest_cols = [col for col in all_cols if col not in specified_cols
+                 and col != "player_1_won"]
+
+    column_order = specified_cols + rest_cols + ["player_1_won"]
+    df = df[column_order]
+
     return df
 
 
