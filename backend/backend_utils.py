@@ -8,18 +8,17 @@ from config import ROOT_DIR
 BOOSTING_CSV = f"{ROOT_DIR}/data/atp_matches_final_boosting_model.csv"
 
 
-def get_csv_rows(file_name: str=BOOSTING_CSV):
-    df = pd.read_csv(file_name, index_col=0)
-    pprint(list(df.columns))
+def get_boosting_df(file_name: str=BOOSTING_CSV):
+    boosting_df = pd.read_csv(file_name, index_col=0)
+    pprint(list(boosting_df.columns))
 
-    return df.values.tolist()
+    return boosting_df
 
 
-def get_player_data_dict(csv_rows: List[Union[int, float, str,
-                    bool]]) -> dict:
+def get_player_data_dict(boosting_df: pd.DataFrame) -> dict:
     player_data_dict = {}
-    for row in csv_rows[::-1]:
-        player_1_id, player_2_id = row[0], row[29]
+    for row in boosting_df.itertuples():
+        player_1_id, player_2_id = row.player_1_id, row.player_2_id
         if player_1_id not in player_data_dict:
             player_data_dict[player_1_id] = row[1:]
         if player_2_id not in player_data_dict:
@@ -29,7 +28,7 @@ def get_player_data_dict(csv_rows: List[Union[int, float, str,
 
 
 if __name__ == '__main__':
-    csv_rows = get_csv_rows()
-    player_data_dict = get_player_data_dict(csv_rows)
+    boosting_df = get_boosting_df()
+    player_data_dict = get_player_data_dict(boosting_df)
 
     print(player_data_dict[101142])
