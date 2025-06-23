@@ -1,6 +1,7 @@
 import os
 from typing import List, Union, Optional, Tuple
 from secrets import choice
+from warnings import simplefilter
 
 import pandas as pd
 from pandas import DataFrame
@@ -14,6 +15,7 @@ from data_processing.catboost import CleanCatBoost
 from data_processing.feature_engineering import FeatureEngineeringDf
 
 logger = get_logger("utils.dataframe")
+simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
 
 def get_cleaner(model: str) -> Union[type[CleanRandomForestDf],
