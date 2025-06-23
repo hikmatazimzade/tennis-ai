@@ -40,7 +40,6 @@ def save_final_dataframe(model: str) -> None:
     final_path = get_final_path(model)
 
     logger.info(f"Successfully saved {model} model to {final_path}!")
-    final_dataframe = reorder_dataframe(final_dataframe)
     final_dataframe.to_csv(final_path, index=False)
 
 
@@ -59,6 +58,7 @@ def get_final_dataframe(model: str) -> DataFrame:
 
     feature_engineering = FeatureEngineeringDf(df)
     df = feature_engineering.apply_feature_engineering()
+    df = reorder_dataframe(df)
 
     return df
 
