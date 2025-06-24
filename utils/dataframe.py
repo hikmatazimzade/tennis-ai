@@ -199,6 +199,7 @@ def delete_columns(df: DataFrame,
             + ["player_1_was_seeded", "player_2_was_seeded", "seed_diff"]
             + ["Unnamed: 0", "tourney_level_O"]
                 + ["player_1_id", "player_2_id"]
+            + ["player_1_original_rank", "player_2_original_rank"]
             + ["player_1_surface_h2h_won", "player_2_surface_h2h_won"]
                 + entry_columns + numerical_columns + last_n_matches_columns
                 + in_game_columns + elo_progress_columns)
