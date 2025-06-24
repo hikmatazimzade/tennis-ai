@@ -43,8 +43,8 @@ class CleanDf(ABC):
         ]
 
     def drop_columns(self, column_names: Tuple[str]=(
-        "tourney_name", "tourney_id", "match_num", "winner_name",
-        "loser_name", "score", "best_of", "round", "minutes",
+        "tourney_name", "tourney_id", "match_num",
+        "score", "best_of", "round", "minutes",
         "loser_entry_S", "Unnamed: 0"
     )):
             dropped_columns = []

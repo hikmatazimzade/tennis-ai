@@ -3,14 +3,12 @@ from collections import namedtuple
 
 import pandas as pd
 
-from config import ROOT_DIR
+from utils.dataframe import read_final_csv
 
-BOOSTING_CSV = f"{ROOT_DIR}/data/atp_matches_final_boosting_model.csv"
 EXCLUDED_FEATURES = [
     "_id", "_seed", "_ioc", "_ace", "_df", "_svpt", "_1stIn", "_1stWon",
     "_2ndWon", "_SvGms", "_bpSaved", "_bpFaced", "_was_seeded"
 ]
-
 
 class Player:
     def __init__(self, row: Iterable, column_names: List[str], num: int=1):
@@ -43,13 +41,13 @@ class Player:
         return PlayerData
 
 
-def get_boosting_df(file_name: str=BOOSTING_CSV):
+def get_boosting_df(file_name: str):
     boosting_df = pd.read_csv(file_name, index_col=0)
-
     return boosting_df
 
 
-def get_player_data_dict(boosting_df: pd.DataFrame) -> dict:
+def get_player_data_dict(model: str="boosting_model") -> dict:
+    boosting_df = read_final_csv(model)
     player_data_dict = {}
     column_names = list(boosting_df.columns)
 
@@ -63,10 +61,10 @@ def get_player_data_dict(boosting_df: pd.DataFrame) -> dict:
 
     return player_data_dict
 
+PLAYER_DATA_DICT = get_player_data_dict()
+
 
 if __name__ == '__main__':
-    boosting_df = get_boosting_df()
-    player_data_dict = get_player_data_dict(boosting_df)
-
-    chosen_player = player_data_dict[101142]
+    chosen_player = PLAYER_DATA_DICT[101142]
     print(chosen_player.player_data)
+    print(len(chosen_player.player_data))
