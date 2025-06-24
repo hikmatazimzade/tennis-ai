@@ -21,6 +21,7 @@ class CleanDf(ABC):
             self.drop_columns,
             self.handle_ambidextrous_hand,
 
+            self.set_original_rank,
             self.handle_nan_seed_values,
             self.handle_seed_values,
             self.handle_ranks,
@@ -113,6 +114,10 @@ class CleanDf(ABC):
         for column in column_names:
             self.df[column] = self.df[column].clip(upper=cap)
             self.df[column] = self.df[column].clip(upper=cap)
+
+    def set_original_rank(self) -> None:
+        self.df["winner_original_rank"] = self.df["winner_rank"]
+        self.df["loser_original_rank"] = self.df["loser_rank"]
 
     def handle_ranks(self) -> None:
         self.apply_clip()

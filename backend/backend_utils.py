@@ -7,7 +7,8 @@ from utils.dataframe import read_final_csv
 
 EXCLUDED_FEATURES = [
     "_id", "_seed", "_ioc", "_ace", "_df", "_svpt", "_1stIn", "_1stWon",
-    "_2ndWon", "_SvGms", "_bpSaved", "_bpFaced", "_was_seeded"
+    "_2ndWon", "_SvGms", "_bpSaved", "_bpFaced", "_was_seeded",
+    "h2h_won"
 ]
 
 class Player:
@@ -51,7 +52,7 @@ def get_player_data_dict(model: str="boosting_model") -> dict:
     player_data_dict = {}
     column_names = list(boosting_df.columns)
 
-    for row in boosting_df.itertuples():
+    for row in boosting_df[::-1].itertuples():
         player_1_id, player_2_id = row.player_1_id, row.player_2_id
 
         if player_1_id not in player_data_dict:
