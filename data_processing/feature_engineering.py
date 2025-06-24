@@ -218,6 +218,7 @@ class PlayerStatsEngineering(FeatureEngineeringBase):
     def apply_feature_engineering(self) -> pd.DataFrame:
         self.add_rank_feature_differences()
         self.add_seed_diff()
+        self.add_original_rank_diff()
         return self.df
 
     def add_rank_feature_differences(self) -> None:
@@ -235,6 +236,10 @@ class PlayerStatsEngineering(FeatureEngineeringBase):
     def add_rank_points_diff(self) -> None:
         self.df["rank_points_diff"] = (self.df["player_1_rank_points"]
                                        - self.df["player_2_rank_points"])
+
+    def add_original_rank_diff(self) -> None:
+        self.df["original_rank_diff"] = (self.df["player_1_original_rank"]
+                                         - self.df["player_2_original_rank"])
 
 
 class PhysicalEngineering(FeatureEngineeringBase):
