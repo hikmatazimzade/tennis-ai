@@ -3,11 +3,15 @@ from collections import defaultdict
 
 import pandas as pd
 
-from utils.dataframe import read_final_csv
+from utils.dataframe import (
+    read_final_csv,
+    delete_columns
+)
+
 from utils.feature_helpers import (
-    get_h2h_params,
-    get_surface_index_by_row,
-    get_surface_name_by_row
+    get_head_to_head_dict,
+    get_surface_head_to_head_dict,
+    get_surface_name_by_row,
 )
 
 EXCLUDED_FEATURES = [
@@ -106,48 +110,13 @@ def get_final_player_columns(PLAYER_1_ALL_COLUMNS: List[str],
     )
 
 
-def get_head_to_head_dict(df: pd.DataFrame
-                          ) -> defaultdict[int, List[int]]:
-    h2h_dict = defaultdict(lambda: [0, 0])
-
-    for row in df.itertuples():
-        player_1_id, player_2_id = row.player_1_id, row.player_2_id
-        player_1_won = row.player_1_won
-
-        key, first, second = get_h2h_params(player_1_id,
-                                            player_2_id, h2h_dict)
-
-        if player_1_won:
-            h2h_dict[key][first] += 1
-        else:
-            h2h_dict[key][second] += 1
-
-    return h2h_dict
-
-
-def get_surface_head_to_head_dict(df: pd.DataFrame
-                                   ) -> defaultdict[int, List[List[int]]]:
-    surface_h2h_dict = defaultdict(lambda: [[0, 0], [0, 0],
-                                                [0, 0], [0, 0]])
-    for row in df.itertuples():
-        player_1_id, player_2_id = row.player_1_id, row.player_2_id
-        player_1_won = row.player_1_won
-
-        key, first, second = get_h2h_params(player_1_id,
-                                            player_2_id, surface_h2h_dict)
-
-        surface_idx = get_surface_index_by_row(row)
-
-        if player_1_won:
-            surface_h2h_dict[key][surface_idx][first] += 1
-        else:
-            surface_h2h_dict[key][surface_idx][second] += 1
-
-    return surface_h2h_dict
-
+LAST_N_MATCHES = [5, 10, 20, 50]
 
 BOOSTING_DF = read_final_csv("boosting_model")
 COLUMN_NAMES = list(BOOSTING_DF.columns)
+
+PREDICTION_DF = delete_columns(BOOSTING_DF, LAST_N_MATCHES)
+PREDICTION_COLUMNS = list(PREDICTION_DF.columns)
 
 PLAYER_1_ALL_COLUMNS = get_player_column_names(COLUMN_NAMES, 1)
 PLAYER_2_ALL_COLUMNS = get_player_column_names(COLUMN_NAMES, 2)

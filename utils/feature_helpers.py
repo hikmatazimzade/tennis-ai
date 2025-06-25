@@ -299,6 +299,46 @@ def get_h2h_params(player_1_id: int, player_2_id: int,
     return key, first, second
 
 
+def get_head_to_head_dict(df: pd.DataFrame
+                          ) -> defaultdict[int, List[int]]:
+    h2h_dict = defaultdict(lambda: [0, 0])
+
+    for row in df.itertuples():
+        player_1_id, player_2_id = row.player_1_id, row.player_2_id
+        player_1_won = row.player_1_won
+
+        key, first, second = get_h2h_params(player_1_id,
+                                            player_2_id, h2h_dict)
+
+        if player_1_won:
+            h2h_dict[key][first] += 1
+        else:
+            h2h_dict[key][second] += 1
+
+    return h2h_dict
+
+
+def get_surface_head_to_head_dict(df: pd.DataFrame
+                                   ) -> defaultdict[int, List[List[int]]]:
+    surface_h2h_dict = defaultdict(lambda: [[0, 0], [0, 0],
+                                                [0, 0], [0, 0]])
+    for row in df.itertuples():
+        player_1_id, player_2_id = row.player_1_id, row.player_2_id
+        player_1_won = row.player_1_won
+
+        key, first, second = get_h2h_params(player_1_id,
+                                            player_2_id, surface_h2h_dict)
+
+        surface_idx = get_surface_index_by_row(row)
+
+        if player_1_won:
+            surface_h2h_dict[key][surface_idx][first] += 1
+        else:
+            surface_h2h_dict[key][surface_idx][second] += 1
+
+    return surface_h2h_dict
+
+
 def get_last_won_match_data(match_dt: defaultdict, player_1_id: int,
         player_2_id: int, match_idx: int) -> Tuple[int, int]:
     return (match_dt[player_1_id][match_idx],
