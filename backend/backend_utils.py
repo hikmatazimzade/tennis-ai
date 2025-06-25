@@ -1,16 +1,8 @@
 from typing import List, Iterable, Tuple
-from collections import defaultdict
 
 import pandas as pd
 
-from utils.dataframe import (
-    read_final_csv,
-    delete_columns
-)
-
 from utils.feature_helpers import (
-    get_head_to_head_dict,
-    get_surface_head_to_head_dict,
     get_surface_name_by_row,
 )
 
@@ -21,13 +13,11 @@ EXCLUDED_FEATURES = [
 ]
 
 class Player:
-    def __init__(self, row: Iterable, num: int=1):
+    def __init__(self, row: Iterable, column_names: List[str], num: int=1):
         self.row = row
         self.num = num
 
-        if num == 1: self.column_names = PLAYER_1_COLUMNS
-        else: self.column_names = PLAYER_2_COLUMNS
-
+        self.column_names = column_names
         self.set_player_attributes()
 
     def set_player_attributes(self):
@@ -41,16 +31,17 @@ class Player:
         return f"{self.player_name}: {self.player_win_ratio}"
 
 
-def get_player_data_dict(df: pd.DataFrame) -> dict:
+def get_player_data_dict(df: pd.DataFrame, player_1_columns: List[str],
+                         player_2_columns: List[str]) -> dict:
     player_data_dict = {}
 
     for row in df[::-1].itertuples():
         player_1_id, player_2_id = row.player_1_id, row.player_2_id
 
         if player_1_id not in player_data_dict:
-            player_data_dict[player_1_id] = Player(row)
+            player_data_dict[player_1_id] = Player(row, player_1_columns)
         if player_2_id not in player_data_dict:
-            player_data_dict[player_2_id] = Player(row, 2)
+            player_data_dict[player_2_id] = Player(row, player_2_columns, 2)
 
     return player_data_dict
 
@@ -68,14 +59,16 @@ def set_surface_attributes(player_surface_columns: List[str], row: Iterable,
             setattr(player, new_col, row_val)
 
 
-def add_surface_attributes(df: pd.DataFrame) -> None:
+def add_surface_attributes(df: pd.DataFrame, player_data_dict: dict,
+        player_1_surface_columns: List[str],
+        player_2_surface_columns: List[str]) -> None:
     for row in df[::-1].itertuples():
         player_1_id, player_2_id = row.player_1_id, row.player_2_id
-        player_1 = PLAYER_DATA_DICT[player_1_id]
-        player_2 = PLAYER_DATA_DICT[player_2_id]
+        player_1 = player_data_dict[player_1_id]
+        player_2 = player_data_dict[player_2_id]
 
-        set_surface_attributes(PLAYER_1_SURFACE_COLUMNS, row, player_1)
-        set_surface_attributes(PLAYER_2_SURFACE_COLUMNS, row, player_2, 2)
+        set_surface_attributes(player_1_surface_columns, row, player_1)
+        set_surface_attributes(player_2_surface_columns, row, player_2, 2)
 
 
 def get_player_column_names(column_names: List[str],
@@ -108,42 +101,3 @@ def get_final_player_columns(PLAYER_1_ALL_COLUMNS: List[str],
         PLAYER_1_COLUMNS, PLAYER_2_COLUMNS,
         PLAYER_1_SURFACE_COLUMNS, PLAYER_2_SURFACE_COLUMNS
     )
-
-
-LAST_N_MATCHES = [5, 10, 20, 50]
-
-BOOSTING_DF = read_final_csv("boosting_model")
-COLUMN_NAMES = list(BOOSTING_DF.columns)
-
-PREDICTION_DF = delete_columns(BOOSTING_DF, LAST_N_MATCHES)
-PREDICTION_COLUMNS = list(PREDICTION_DF.columns)
-
-PLAYER_1_ALL_COLUMNS = get_player_column_names(COLUMN_NAMES, 1)
-PLAYER_2_ALL_COLUMNS = get_player_column_names(COLUMN_NAMES, 2)
-
-(
-    PLAYER_1_COLUMNS,
-    PLAYER_2_COLUMNS,
-    PLAYER_1_SURFACE_COLUMNS,
-    PLAYER_2_SURFACE_COLUMNS,
-) = get_final_player_columns(PLAYER_1_ALL_COLUMNS, PLAYER_2_ALL_COLUMNS)
-
-PLAYER_DATA_DICT = get_player_data_dict(BOOSTING_DF)
-add_surface_attributes(BOOSTING_DF)
-
-H2H_DICT = get_head_to_head_dict(BOOSTING_DF)
-SURFACE_H2H_DICT = get_surface_head_to_head_dict(BOOSTING_DF)
-
-
-if __name__ == '__main__':
-    chosen_player = PLAYER_DATA_DICT[101142]
-    print(chosen_player)
-    chosen_dict = chosen_player.__dict__
-    del chosen_dict["row"]
-    del chosen_dict["column_names"]
-    del chosen_dict["num"]
-
-    print(chosen_dict)
-
-    print(list(H2H_DICT.items())[:5])
-    print(list(SURFACE_H2H_DICT.items())[:5])
