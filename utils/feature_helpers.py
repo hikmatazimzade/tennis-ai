@@ -193,6 +193,13 @@ def get_surface_name_by_row(row: pd.DataFrame.itertuples) -> str:
     else: return "Hard"
 
 
+def get_surface_idx_by_name(surface: str) -> int:
+    if surface == "carpet": return Surface.CARPET.value
+    elif surface == "clay": return Surface.CLAY.value
+    elif surface == "grass": return Surface.GRASS.value
+    else: return Surface.HARD.value
+
+
 def update_elo_surface(elo_rating: dict, player_1_won: bool, K: int,
             player_1_id: int, player_2_id: int, surface_idx: int) -> None:
     actual_score_1 = 1 if player_1_won else 0
