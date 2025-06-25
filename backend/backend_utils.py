@@ -1,4 +1,4 @@
-from typing import List, Iterable
+from typing import List, Iterable, Tuple
 from collections import namedtuple, defaultdict
 
 import pandas as pd
@@ -16,28 +16,16 @@ EXCLUDED_FEATURES = [
 ]
 
 class Player:
-    def __init__(self, row: Iterable, column_names: List[str], num: int=1):
+    def __init__(self, row: Iterable, num: int=1):
         self.row = row
-        self.column_names = column_names
         self.num = num
 
-        self.column_names = self.get_new_column_names()
+        if num == 1: self.column_names = PLAYER_1_COLUMNS
+        else: self.column_names = PLAYER_2_COLUMNS
         PlayerData = self.get_player_data_instance()
 
         data = [getattr(row, col) for col in self.column_names]
         self.player_data = PlayerData(*data)
-
-    def get_new_column_names(self):
-        column_names = (
-            [col for col in self.column_names
-                    if col.startswith(f"player_{self.num}")
-             and not any(
-                [feat for feat in EXCLUDED_FEATURES if col.endswith(feat)]
-            )
-             and "entry" not in col and col != f"player_{self.num}_won"
-             ]
-        )
-        return column_names
 
     def get_player_data_instance(self):
         PlayerData = namedtuple("PlayerData",
@@ -48,17 +36,48 @@ class Player:
 
 def get_player_data_dict(df: pd.DataFrame) -> dict:
     player_data_dict = {}
-    column_names = list(df.columns)
 
     for row in df[::-1].itertuples():
         player_1_id, player_2_id = row.player_1_id, row.player_2_id
 
         if player_1_id not in player_data_dict:
-            player_data_dict[player_1_id] = Player(row, column_names)
+            player_data_dict[player_1_id] = Player(row)
         if player_2_id not in player_data_dict:
-            player_data_dict[player_2_id] = Player(row, column_names, 2)
+            player_data_dict[player_2_id] = Player(row, 2)
 
     return player_data_dict
+
+
+def get_player_column_names(column_names: List[str],
+                            num: int=1) -> List[str]:
+    player_column_names = (
+        [col for col in column_names
+         if col.startswith(f"player_{num}")
+         and not any(
+            [feat for feat in EXCLUDED_FEATURES if col.endswith(feat)]
+        )
+         and "entry" not in col and col != f"player_{num}_won"
+         ]
+    )
+    return player_column_names
+
+
+def get_final_player_columns(PLAYER_1_ALL_COLUMNS: List[str],
+                             PLAYER_2_ALL_COLUMNS: List[str]
+    ) -> Tuple[List[str], ...]:
+    PLAYER_1_COLUMNS = [col for col in PLAYER_1_ALL_COLUMNS
+                        if "surface" not in col]
+    PLAYER_2_COLUMNS = [col for col in PLAYER_2_ALL_COLUMNS
+                        if "surface" not in col]
+
+    PLAYER_1_SURFACE_COLUMNS = [col for col in PLAYER_1_ALL_COLUMNS
+                                if "surface" in col]
+    PLAYER_2_SURFACE_COLUMNS = [col for col in PLAYER_2_ALL_COLUMNS
+                                if "surface" in col]
+    return (
+        PLAYER_1_COLUMNS, PLAYER_2_COLUMNS,
+        PLAYER_1_SURFACE_COLUMNS, PLAYER_2_SURFACE_COLUMNS
+    )
 
 
 def get_head_to_head_dict(df: pd.DataFrame
@@ -102,6 +121,18 @@ def get_surface_head_to_head_dict(df: pd.DataFrame
 
 
 BOOSTING_DF = read_final_csv("boosting_model")
+COLUMN_NAMES = list(BOOSTING_DF.columns)
+
+PLAYER_1_ALL_COLUMNS = get_player_column_names(COLUMN_NAMES, 1)
+PLAYER_2_ALL_COLUMNS = get_player_column_names(COLUMN_NAMES, 2)
+
+(
+    PLAYER_1_COLUMNS,
+    PLAYER_2_COLUMNS,
+    PLAYER_1_SURFACE_COLUMNS,
+    PLAYER_2_SURFACE_COLUMNS,
+) = get_final_player_columns(PLAYER_1_ALL_COLUMNS, PLAYER_2_ALL_COLUMNS)
+
 PLAYER_DATA_DICT = get_player_data_dict(BOOSTING_DF)
 
 H2H_DICT = get_head_to_head_dict(BOOSTING_DF)
