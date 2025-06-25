@@ -6,7 +6,8 @@ import pandas as pd
 from utils.dataframe import read_final_csv
 from utils.feature_helpers import (
     get_h2h_params,
-    get_surface_index_by_row
+    get_surface_index_by_row,
+    get_surface_name_by_row
 )
 
 EXCLUDED_FEATURES = [
@@ -48,6 +49,29 @@ def get_player_data_dict(df: pd.DataFrame) -> dict:
             player_data_dict[player_2_id] = Player(row, 2)
 
     return player_data_dict
+
+
+def set_surface_attributes(player_surface_columns: List[str], row: Iterable,
+                           player: Player, num: int=1) -> None:
+    surface_name = get_surface_name_by_row(row)
+    for col in player_surface_columns:
+        new_col = f"{col}_{surface_name}"
+        new_col = new_col.replace(f"player_{num}", "player")
+
+        row_val = getattr(row, col)
+
+        if not hasattr(player, new_col):
+            setattr(player, new_col, row_val)
+
+
+def add_surface_attributes(df: pd.DataFrame) -> None:
+    for row in df[::-1].itertuples():
+        player_1_id, player_2_id = row.player_1_id, row.player_2_id
+        player_1 = PLAYER_DATA_DICT[player_1_id]
+        player_2 = PLAYER_DATA_DICT[player_2_id]
+
+        set_surface_attributes(PLAYER_1_SURFACE_COLUMNS, row, player_1)
+        set_surface_attributes(PLAYER_2_SURFACE_COLUMNS, row, player_2, 2)
 
 
 def get_player_column_names(column_names: List[str],
@@ -136,6 +160,7 @@ PLAYER_2_ALL_COLUMNS = get_player_column_names(COLUMN_NAMES, 2)
 ) = get_final_player_columns(PLAYER_1_ALL_COLUMNS, PLAYER_2_ALL_COLUMNS)
 
 PLAYER_DATA_DICT = get_player_data_dict(BOOSTING_DF)
+add_surface_attributes(BOOSTING_DF)
 
 H2H_DICT = get_head_to_head_dict(BOOSTING_DF)
 SURFACE_H2H_DICT = get_surface_head_to_head_dict(BOOSTING_DF)
@@ -144,6 +169,12 @@ SURFACE_H2H_DICT = get_surface_head_to_head_dict(BOOSTING_DF)
 if __name__ == '__main__':
     chosen_player = PLAYER_DATA_DICT[101142]
     print(chosen_player)
+    chosen_dict = chosen_player.__dict__
+    del chosen_dict["row"]
+    del chosen_dict["column_names"]
+    del chosen_dict["num"]
+
+    print(chosen_dict)
 
     print(list(H2H_DICT.items())[:5])
     print(list(SURFACE_H2H_DICT.items())[:5])

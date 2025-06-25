@@ -183,6 +183,16 @@ def append_elo_surfaces(player_1_elos: list, player_2_elos: list,
     player_2_elos.append(elo_rating[player_2_id][surface_idx])
 
 
+def get_surface_name_by_row(row: pd.DataFrame.itertuples) -> str:
+    carpet, clay = row.surface_Carpet, row.surface_Clay
+    grass, hard = row.surface_Grass, row.surface_Hard
+
+    if carpet: return "Carpet"
+    if clay: return "Clay"
+    if grass: return "Grass"
+    else: return "Hard"
+
+
 def update_elo_surface(elo_rating: dict, player_1_won: bool, K: int,
             player_1_id: int, player_2_id: int, surface_idx: int) -> None:
     actual_score_1 = 1 if player_1_won else 0
