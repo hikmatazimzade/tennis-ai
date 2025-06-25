@@ -133,7 +133,7 @@ def get_entry_columns_to_delete() -> List[str]:
 
 
 def get_player_numerical_columns_to_delete() -> List[str]:
-    return ["player_1_surface_elo", "player_2_surface_elo",
+    return ["player_1_elo_surface", "player_2_elo_surface",
             "player_1_elo", "player_2_elo", "player_1_age", "player_2_age",
             "player_1_ht", "player_2_ht", "player_1_rank_points",
             "player_2_rank_points", "player_1_rank", "player_2_rank",

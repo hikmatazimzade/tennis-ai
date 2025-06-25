@@ -531,8 +531,8 @@ class EloEngineering(FeatureEngineeringBase):
         self.add_elo()
         self.add_elo_diff()
 
-        self.add_surface_elo()
-        self.add_surface_elo_diff()
+        self.add_elo_surface()
+        self.add_elo_surface_diff()
 
         self.add_elo_progress_column()
         self.add_last_matches_elo_progress()
@@ -548,16 +548,16 @@ class EloEngineering(FeatureEngineeringBase):
         self.df["elo_diff"] = (self.df["player_1_elo"]
                                - self.df["player_2_elo"])
 
-    def add_surface_elo(self) -> None:
-        player_1_elos, player_2_elos = get_surface_elos(self.df, self.K)
+    def add_elo_surface(self) -> None:
+        player_1_elos, player_2_elos = get_elo_surfaces(self.df, self.K)
 
-        self.df["player_1_surface_elo"] = player_1_elos
-        self.df["player_2_surface_elo"] = player_2_elos
+        self.df["player_1_elo_surface"] = player_1_elos
+        self.df["player_2_elo_surface"] = player_2_elos
 
-    def add_surface_elo_diff(self) -> None:
-        self.df["surface_elo_diff"] = (
-                self.df["player_1_surface_elo"]
-                - self.df["player_2_surface_elo"]
+    def add_elo_surface_diff(self) -> None:
+        self.df["elo_surface_diff"] = (
+                self.df["player_1_elo_surface"]
+                - self.df["player_2_elo_surface"]
         )
 
     def add_elo_progress_column(self) -> None:

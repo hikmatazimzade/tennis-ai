@@ -176,14 +176,14 @@ def get_surface_index_by_row(row: pd.DataFrame.itertuples) -> int:
     return surface_idx
 
 
-def append_surface_elos(player_1_elos: list, player_2_elos: list,
+def append_elo_surfaces(player_1_elos: list, player_2_elos: list,
                 player_1_id: int, player_2_id: int,
                 elo_rating, surface_idx: int) -> None:
     player_1_elos.append(elo_rating[player_1_id][surface_idx])
     player_2_elos.append(elo_rating[player_2_id][surface_idx])
 
 
-def update_surface_elo(elo_rating: dict, player_1_won: bool, K: int,
+def update_elo_surface(elo_rating: dict, player_1_won: bool, K: int,
             player_1_id: int, player_2_id: int, surface_idx: int) -> None:
     actual_score_1 = 1 if player_1_won else 0
     actual_score_2 = 1 - actual_score_1
@@ -200,7 +200,7 @@ def update_surface_elo(elo_rating: dict, player_1_won: bool, K: int,
                                                  - expected_score_2)
 
 
-def get_surface_elos(df: pd.DataFrame, K: int) -> Tuple[list, list]:
+def get_elo_surfaces(df: pd.DataFrame, K: int) -> Tuple[list, list]:
     elo_rating = defaultdict(lambda: [1500, 1500, 1500, 1500])
     # carpet, clay, grass, hard
 
@@ -213,9 +213,9 @@ def get_surface_elos(df: pd.DataFrame, K: int) -> Tuple[list, list]:
         player_1_id, player_2_id = row.player_1_id, row.player_2_id
         player_1_won = row.player_1_won
 
-        append_surface_elos(player_1_elos, player_2_elos, player_1_id,
+        append_elo_surfaces(player_1_elos, player_2_elos, player_1_id,
                     player_2_id, elo_rating, surface_idx)
-        update_surface_elo(elo_rating, player_1_won, K, player_1_id,
+        update_elo_surface(elo_rating, player_1_won, K, player_1_id,
                            player_2_id, surface_idx)
 
     return player_1_elos, player_2_elos
