@@ -1,5 +1,5 @@
 from typing import List, Iterable, Tuple
-from collections import namedtuple, defaultdict
+from collections import defaultdict
 
 import pandas as pd
 
@@ -22,16 +22,18 @@ class Player:
 
         if num == 1: self.column_names = PLAYER_1_COLUMNS
         else: self.column_names = PLAYER_2_COLUMNS
-        PlayerData = self.get_player_data_instance()
 
-        data = [getattr(row, col) for col in self.column_names]
-        self.player_data = PlayerData(*data)
+        self.set_player_attributes()
 
-    def get_player_data_instance(self):
-        PlayerData = namedtuple("PlayerData",
-                [col.replace(f"player_{self.num}", "player")
-                        for col in self.column_names])
-        return PlayerData
+    def set_player_attributes(self):
+        for col in self.column_names:
+            new_col = col.replace(f"player_{self.num}", "player")
+            setattr(self, new_col, getattr(self.row, col))
+
+        return None
+
+    def __str__(self):
+        return f"{self.player_name}: {self.player_win_ratio}"
 
 
 def get_player_data_dict(df: pd.DataFrame) -> dict:
@@ -141,8 +143,7 @@ SURFACE_H2H_DICT = get_surface_head_to_head_dict(BOOSTING_DF)
 
 if __name__ == '__main__':
     chosen_player = PLAYER_DATA_DICT[101142]
-    print(chosen_player.player_data)
-    print(len(chosen_player.player_data))
+    print(chosen_player)
 
     print(list(H2H_DICT.items())[:5])
     print(list(SURFACE_H2H_DICT.items())[:5])
