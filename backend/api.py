@@ -11,7 +11,8 @@ from backend.storage import (
     H2H_DICT,
     SURFACE_H2H_DICT,
     PREDICTION_COLUMNS,
-    IOC_DICT
+    IOC_DICT,
+    SORTED_PLAYER_IDS
 )
 
 from backend.backend_utils import Player, get_surface_player_val
@@ -243,9 +244,26 @@ def get_main_statistics_dict(player: Player,
     return {
         "name": name, "ioc": ioc, "rank": original_rank,
         "hand": hand, "age": age, "height": height,
-        "rank_points": rank_points, "elo_rating": elo,
+        "rank_points": rank_points, "elo": elo,
         "win_rate": win_ratio, "won_match": won_match,
         "lost_match": lost_match, "total_match": total_match
+    }
+
+def get_preview_statistics_dict(player: Player,
+                            player_id: int) -> Dict[str, Union[str, float]]:
+    name = player.name
+    ioc = IOC_DICT.get(player_id, "Unknown")
+
+    original_rank, rank_points = player.original_rank, player.rank_points
+    elo, win_ratio = player.elo, player.win_ratio
+
+    age = player.age
+    total_match = player.total_match
+
+    return {
+        "name": name, "ioc": ioc, "rank": original_rank, "elo": elo,
+        "win_rate": win_ratio, "rank_points": rank_points,
+        "age": age, "total_match": total_match
     }
 
 
