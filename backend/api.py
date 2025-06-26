@@ -15,7 +15,9 @@ from backend.storage import (
 
 from backend.backend_utils import Player, get_surface_player_val
 from utils.feature_helpers import get_surface_idx_by_name
+from utils.logger import get_logger
 from config import ROOT_DIR
+
 
 app = FastAPI()
 
@@ -25,7 +27,8 @@ TOURNEY_DAY = 15
 
 MODEL = CatBoostClassifier()
 MODEL.load_model(f'{ROOT_DIR}/models/catboost_model.cbm')
-print(MODEL)
+
+logger = get_logger("backend.api")
 
 
 class Prediction(BaseModel):
@@ -199,14 +202,17 @@ def get_prediction_array(prediction_data: PredictionData) -> np.array:
 
 def get_model_output(prediction_array: np.array) -> Tuple[int, float]:
     player_1_won = MODEL.predict(prediction_array)
-    print(f"Player 1 Won: {player_1_won[0]}")
+    logger.debug(f"Raw Winner Prediction: {player_1_won[0]}")
 
     probabilities = MODEL.predict_proba(prediction_array)
     confidence_score = np.max(probabilities[0])
-    print(f"Confidence Score: {confidence_score}")
+    logger.debug(f"Raw Confidence Score: {confidence_score}")
 
     winner_player = 1 if player_1_won else 2
     confidence_percent = round(confidence_score * 100, 2)
+    logger.info(f"Model Prediction: Player {winner_player}"
+                f" wins with {confidence_percent}% confidence")
+
     return winner_player, confidence_percent
 
 
