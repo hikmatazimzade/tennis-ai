@@ -159,24 +159,30 @@ def get_head_to_head_surface_diff(player_1_id: int, player_2_id: int,
     return curr[0] - curr[1]
 
 
-@app.post("/prediction")
-def prediction(prediction: Prediction) -> dict:
+def get_prediction_data(player_1: Player, player_2: Player,
+                        prediction: Prediction) -> PredictionData:
     player_1_id, player_2_id = prediction.player_1_id, prediction.player_2_id
-    player_1 = PLAYER_DATA_DICT[player_1_id]
-    player_2 = PLAYER_DATA_DICT[player_2_id]
-
     prediction_data = PredictionData(player_1, player_2, prediction)
     prediction_data.set()
 
     surface_idx = get_surface_idx_by_name(prediction.surface)
     h2h_diff = get_head_to_head_diff(player_1_id, player_2_id)
     surface_h2h_diff = get_head_to_head_surface_diff(player_1_id,
-                                    player_2_id, surface_idx)
+                                                     player_2_id, surface_idx)
 
     prediction_data.h2h_diff = h2h_diff
     prediction_data.h2h_surface = surface_h2h_diff
-    print(prediction_data.__dict__)
-    print(len(prediction_data.__dict__.keys()))
+    return prediction_data
+
+
+@app.post("/prediction")
+def prediction(prediction: Prediction) -> dict:
+    player_1_id, player_2_id = prediction.player_1_id, prediction.player_2_id
+    player_1 = PLAYER_DATA_DICT[player_1_id]
+    player_2 = PLAYER_DATA_DICT[player_2_id]
+
+    prediction_data = get_prediction_data(player_1, player_2, prediction)
+    print(prediction_data)
 
     return {
         "player_1_won": 1,
