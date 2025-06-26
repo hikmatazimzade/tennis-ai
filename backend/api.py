@@ -5,7 +5,6 @@ from pydantic import BaseModel
 import uvicorn
 from catboost import CatBoostClassifier
 import numpy as np
-import pandas as pd
 
 from backend.storage import (
     PLAYER_DATA_DICT,
@@ -236,12 +235,17 @@ def get_main_statistics_dict(player: Player,
     original_rank, rank_points = player.original_rank, player.rank_points
     age, height = player.age, player.ht
 
-    elo = player.elo
+    elo, win_ratio = player.elo, player.win_ratio
+    won_match, total_match = player.won_match, player.total_match
+
+    lost_match = total_match - won_match
 
     return {
         "name": name, "ioc": ioc, "rank": original_rank,
         "hand": hand, "age": age, "height": height,
-        "rank_points": rank_points, "elo": elo
+        "rank_points": rank_points, "elo_rating": elo,
+        "win_rate": win_ratio, "won_match": won_match,
+        "lost_match": lost_match, "total_match": total_match
     }
 
 
