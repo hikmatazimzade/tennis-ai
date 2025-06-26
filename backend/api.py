@@ -1,6 +1,7 @@
 from typing import List, Union, Tuple, Dict
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 from catboost import CatBoostClassifier
@@ -22,6 +23,13 @@ from config import ROOT_DIR
 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods = ["*"],
+    allow_headers=["*"]
+)
 
 TOURNEY_YEAR = 2024
 TOURNEY_MONTH = 12
