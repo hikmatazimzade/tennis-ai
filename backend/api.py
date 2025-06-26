@@ -295,8 +295,8 @@ def prediction(prediction: Prediction) -> dict:
     }
 
 
-@app.get("/player_statistics/{player_id}")
-def get_player_statistics(player_id: int) -> dict:
+@app.get("/players/{player_id}")
+def get_player_data(player_id: int) -> dict:
     if player_id not in PLAYER_DATA_DICT:
         raise HTTPException(status_code=404,
                             detail=f"Player {player_id} doesn't exist!")
@@ -307,11 +307,11 @@ def get_player_statistics(player_id: int) -> dict:
     return main_statistics_dict
 
 
-@app.get("/players_statistics/{page_number}")
-def get_players_statistics(page_number: int) -> List[dict]:
-    page_number -= 1
+@app.get("/players")
+def get_players_data(page: int=1) -> List[dict]:
+    page -= 1
     curr_ids = SORTED_PLAYER_IDS[
-        page_number * PAGE_LIMIT:(page_number + 1) * PAGE_LIMIT
+        page * PAGE_LIMIT:(page + 1) * PAGE_LIMIT
     ]
 
     preview_data = [get_preview_statistics_dict(PLAYER_DATA_DICT[id], id)
