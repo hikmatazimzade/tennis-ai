@@ -1,3 +1,5 @@
+from typing import List, Union
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 import uvicorn
@@ -171,8 +173,15 @@ def get_prediction_data(player_1: Player, player_2: Player,
                                                      player_2_id, surface_idx)
 
     prediction_data.h2h_diff = h2h_diff
-    prediction_data.h2h_surface = surface_h2h_diff
+    prediction_data.surface_h2h_diff = surface_h2h_diff
     return prediction_data
+
+
+def get_prediction_list(prediction_data:
+                        PredictionData) -> List[Union[float, int, bool]]:
+    prediction_list = [getattr(prediction_data, col)
+                         for col in PREDICTION_COLUMNS]
+    return prediction_list
 
 
 @app.post("/prediction")
@@ -182,7 +191,8 @@ def prediction(prediction: Prediction) -> dict:
     player_2 = PLAYER_DATA_DICT[player_2_id]
 
     prediction_data = get_prediction_data(player_1, player_2, prediction)
-    print(prediction_data)
+    prediction_list = get_prediction_list(prediction_data)
+    print(prediction_list)
 
     return {
         "player_1_won": 1,

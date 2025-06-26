@@ -22,7 +22,8 @@ BOOSTING_DF = read_final_csv("boosting_model")
 COLUMN_NAMES = list(BOOSTING_DF.columns)
 
 PREDICTION_DF = delete_columns(BOOSTING_DF, LAST_N_MATCHES)
-PREDICTION_COLUMNS = list(PREDICTION_DF.columns)
+PREDICTION_COLUMNS = [col for col in list(PREDICTION_DF.columns)
+                      if col != "player_1_won"]
 
 PLAYER_1_ALL_COLUMNS = get_player_column_names(COLUMN_NAMES, 1)
 PLAYER_2_ALL_COLUMNS = get_player_column_names(COLUMN_NAMES, 2)
