@@ -1,8 +1,10 @@
-from typing import List, Union
+from typing import List, Union, Tuple
 
 from fastapi import FastAPI
 from pydantic import BaseModel
 import uvicorn
+from catboost import CatBoostClassifier
+import numpy as np
 
 from backend.storage import (
     PLAYER_DATA_DICT,
@@ -13,12 +15,17 @@ from backend.storage import (
 
 from backend.backend_utils import Player, get_surface_player_val
 from utils.feature_helpers import get_surface_idx_by_name
+from config import ROOT_DIR
 
 app = FastAPI()
 
 TOURNEY_YEAR = 2024
 TOURNEY_MONTH = 12
 TOURNEY_DAY = 15
+
+MODEL = CatBoostClassifier()
+MODEL.load_model(f'{ROOT_DIR}/models/catboost_model.cbm')
+print(MODEL)
 
 
 class Prediction(BaseModel):
@@ -184,6 +191,25 @@ def get_prediction_list(prediction_data:
     return prediction_list
 
 
+def get_prediction_array(prediction_data: PredictionData) -> np.array:
+    prediction_list = get_prediction_list(prediction_data)
+    prediction_array = np.array(prediction_list).reshape(1, -1)
+    return prediction_array
+
+
+def get_model_output(prediction_array: np.array) -> Tuple[int, float]:
+    player_1_won = MODEL.predict(prediction_array)
+    print(f"Player 1 Won: {player_1_won[0]}")
+
+    probabilities = MODEL.predict_proba(prediction_array)
+    confidence_score = np.max(probabilities[0])
+    print(f"Confidence Score: {confidence_score}")
+
+    winner_player = 1 if player_1_won else 2
+    confidence_percent = round(confidence_score * 100, 2)
+    return winner_player, confidence_percent
+
+
 @app.post("/prediction")
 def prediction(prediction: Prediction) -> dict:
     player_1_id, player_2_id = prediction.player_1_id, prediction.player_2_id
@@ -191,12 +217,13 @@ def prediction(prediction: Prediction) -> dict:
     player_2 = PLAYER_DATA_DICT[player_2_id]
 
     prediction_data = get_prediction_data(player_1, player_2, prediction)
-    prediction_list = get_prediction_list(prediction_data)
-    print(prediction_list)
+    prediction_array = get_prediction_array(prediction_data)
+
+    winner_player, confidence_percent = get_model_output(prediction_array)
 
     return {
-        "player_1_won": 1,
-        "confidence_score": 0.64
+        "winner_player": winner_player,
+        "confidence": confidence_percent
     }
 
 
