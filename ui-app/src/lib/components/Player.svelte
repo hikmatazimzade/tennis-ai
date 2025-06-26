@@ -1,6 +1,28 @@
 <script>
+  import { onMount } from "svelte";
+
   export let playerId;
   export let playerNames;
+
+  let player = {};
+
+  async function fetchPlayer(playerId) {
+    try {
+      const response = await fetch(`http://localhost:8000/players/${playerId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP Error Status!: ${response.status}`);
+      }
+      player = await response.json();
+    } catch (err) {
+      let errorMessage = err.message;
+      console.log(`Error Message: ${errorMessage}`);
+    }
+  }
+
+  onMount(() => {
+    fetchPlayer(playerId);
+  });
+  $: console.log(player);
 </script>
 
 <main>
@@ -11,57 +33,57 @@
     </div>
     <div class="player-card">
       <div class="player-header">
-        <div class="player-name">{playerNames || "Novak Djokovic"}</div>
-        <div class="player-country">SRB</div>
-        <div class="rank-badge">Rank #1</div>
-        <div class="hand-indicator">✋ Right-handed</div>
+        <div class="player-name">{player.name}</div>
+        <div class="player-country">{player.ioc}</div>
+        <div class="rank-badge">Rank #{player.rank}</div>
+        <div class="hand-indicator">✋ {player.hand}</div>
       </div>
       <div class="stats-section">
         <div class="stats-group">
           <div class="stats-title">Player Information</div>
           <div class="stat-item">
             <span class="stat-label">Player ID</span>
-            <span class="stat-value">{playerId || "1"}</span>
+            <span class="stat-value">{playerId}</span>
           </div>
           <div class="stat-item">
             <span class="stat-label">Age</span>
-            <span class="stat-value">36 years</span>
+            <span class="stat-value">{player.age} years</span>
           </div>
           <div class="stat-item">
             <span class="stat-label">Height</span>
-            <span class="stat-value">1.88m</span>
+            <span class="stat-value">{player.height}m</span>
           </div>
         </div>
         <div class="stats-group">
           <div class="stats-title">Rankings & Points</div>
           <div class="stat-item">
             <span class="stat-label">Current Rank</span>
-            <span class="stat-value">#1</span>
+            <span class="stat-value">#{player.rank}</span>
           </div>
           <div class="stat-item">
             <span class="stat-label">Rank Points</span>
-            <span class="stat-value">9,945</span>
+            <span class="stat-value">{player.rank_points}</span>
           </div>
           <div class="stat-item">
             <span class="stat-label">ELO Rating</span>
-            <span class="stat-value">2435</span>
+            <span class="stat-value">{player.elo}</span>
           </div>
         </div>
       </div>
       <div class="performance-highlight">
-        <span class="win-ratio-value">82.5%</span>
+        <span class="win-ratio-value">{player.win_rate}%</span>
         <div class="win-ratio-label">Career Win Rate</div>
         <div class="match-breakdown">
           <div class="match-stat">
-            <span class="match-number">1,063</span>
+            <span class="match-number">{player.won_match}</span>
             <div class="match-label">Matches Won</div>
           </div>
           <div class="match-stat">
-            <span class="match-number">226</span>
+            <span class="match-number">{player.lost_match}</span>
             <div class="match-label">Matches Lost</div>
           </div>
         </div>
-        <div class="total-matches">Total Matches: 1,289</div>
+        <div class="total-matches">Total Matches: {player.total_match}</div>
       </div>
     </div>
   </div>
