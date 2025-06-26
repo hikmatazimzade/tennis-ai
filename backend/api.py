@@ -9,7 +9,7 @@ from backend.storage import (
     PREDICTION_COLUMNS
 )
 
-from backend.backend_utils import Player
+from backend.backend_utils import Player, get_surface_player_val
 from utils.feature_helpers import get_surface_idx_by_name
 
 app = FastAPI()
@@ -45,13 +45,26 @@ class PredictionData:
         'tourney_level_G', 'tourney_level_M',
     ]
 
+    player_total_diff_columns = [
+        col for col in PREDICTION_COLUMNS
+        if "diff" in col and "h2h" not in col
+    ]
+
+    player_diff_columns = [
+        col for col in player_total_diff_columns if "surface" not in col
+    ]
+
+    player_surface_diff_columns = [
+        col for col in player_total_diff_columns if "surface" in col
+    ]
+
     def __init__(self, player_1: Player, player_2: Player,
                  prediction: Prediction):
         self.player_1 = player_1
         self.player_2 = player_2
         self.prediction = prediction
 
-    def set(self):
+    def set(self) -> None:
         self.set_players_entry_data()
         self.set_players_hand_data()
 
@@ -60,25 +73,27 @@ class PredictionData:
         self.set_surface_data(self.prediction.surface)
         self.set_tourney_level(self.prediction.tourney_level)
 
+        self.set_diff_columns()
+        self.set_surface_diff_columns()
         self.draw_size = self.prediction.draw_size
 
-    def set_players_entry_data(self):
+    def set_players_entry_data(self) -> None:
         self.set_player_entry_data(self.prediction.player_1_entry)
         self.set_player_entry_data(self.prediction.player_2_entry, 2)
 
-    def set_players_hand_data(self):
-        self.player_1_hand_L = self.player_1.player_hand_L
-        self.player_1_hand_R = self.player_1.player_hand_R
+    def set_players_hand_data(self) -> None:
+        self.player_1_hand_L = self.player_1.hand_L
+        self.player_1_hand_R = self.player_1.hand_R
 
-        self.player_2_hand_L = self.player_2.player_hand_L
-        self.player_2_hand_R = self.player_2.player_hand_R
+        self.player_2_hand_L = self.player_2.hand_L
+        self.player_2_hand_R = self.player_2.hand_R
 
-    def set_tourney_date(self):
+    def set_tourney_date(self) -> None:
         self.tourney_year = TOURNEY_YEAR
         self.tourney_month = TOURNEY_MONTH
         self.tourney_day = TOURNEY_DAY
 
-    def set_player_entry_data(self, entry_name: str, num: int=1):
+    def set_player_entry_data(self, entry_name: str, num: int=1) -> None:
         for entry_col in self.entry_columns:
             entry_val = True if entry_col == entry_name else False
             setattr(self, f"player_{num}_entry_{entry_col}", entry_val)
@@ -96,6 +111,25 @@ class PredictionData:
                         if tourney_col == f"tourney_level_{tourney_level}"
                         else False)
             setattr(self, tourney_col, tourney_val)
+
+    def set_diff_columns(self) -> None:
+        for col in self.player_diff_columns:
+            player_col = col.replace("_diff", "")
+
+            player_1_val = getattr(self.player_1, player_col)
+            player_2_val = getattr(self.player_2, player_col)
+
+            setattr(self, col, player_1_val - player_2_val)
+
+    def set_surface_diff_columns(self) -> None:
+        surface = self.prediction.surface.capitalize()
+        for col in self.player_surface_diff_columns:
+            player_col = col.replace("diff", surface)
+
+            player_1_val = get_surface_player_val(self.player_1, player_col)
+            player_2_val = get_surface_player_val(self.player_2, player_col)
+
+            setattr(self, col, player_1_val - player_2_val)
 
 
 def get_head_to_head_diff(player_1_id: int, player_2_id: int) -> int:
@@ -142,6 +176,7 @@ def prediction(prediction: Prediction) -> dict:
     prediction_data.h2h_diff = h2h_diff
     prediction_data.h2h_surface = surface_h2h_diff
     print(prediction_data.__dict__)
+    print(len(prediction_data.__dict__.keys()))
 
     return {
         "player_1_won": 1,

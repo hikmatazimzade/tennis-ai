@@ -22,13 +22,13 @@ class Player:
 
     def set_player_attributes(self):
         for col in self.column_names:
-            new_col = col.replace(f"player_{self.num}", "player")
+            new_col = col.replace(f"player_{self.num}_", "")
             setattr(self, new_col, getattr(self.row, col))
 
         return None
 
     def __str__(self):
-        return f"{self.player_name}: {self.player_win_ratio}"
+        return f"{self.name}: {self.win_ratio}"
 
 
 def get_player_data_dict(df: pd.DataFrame, player_1_columns: List[str],
@@ -51,7 +51,7 @@ def set_surface_attributes(player_surface_columns: List[str], row: Iterable,
     surface_name = get_surface_name_by_row(row)
     for col in player_surface_columns:
         new_col = f"{col}_{surface_name}"
-        new_col = new_col.replace(f"player_{num}", "player")
+        new_col = new_col.replace(f"player_{num}_", "")
 
         row_val = getattr(row, col)
 
@@ -101,3 +101,12 @@ def get_final_player_columns(PLAYER_1_ALL_COLUMNS: List[str],
         PLAYER_1_COLUMNS, PLAYER_2_COLUMNS,
         PLAYER_1_SURFACE_COLUMNS, PLAYER_2_SURFACE_COLUMNS
     )
+
+
+def get_surface_player_val(player: Player, player_col: str) -> float | int:
+    if hasattr(player, player_col):
+        player_val = getattr(player, player_col)
+    else:
+        player_val = 0
+
+    return player_val
