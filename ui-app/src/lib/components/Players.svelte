@@ -8,6 +8,7 @@
 
   let players = [];
   $: pageNumber = 1;
+  let totalPages = 0;
 
   async function fetchPlayers() {
     try {
@@ -17,10 +18,19 @@
       if (!response.ok) {
         throw new Error(`HTTP Error Status!: ${response.status}`);
       }
-      players = await response.json();
+      let playersData = await response.json();
+      players = playersData.data;
+      totalPages = playersData.total_page_number;
     } catch (err) {
-      errorMessage = err.message;
-      console.log(`Error Message: ${error}`);
+      let errorMessage = err.message;
+      console.log(`Error Message: ${errorMessage}`);
+    }
+  }
+
+  function changePage(newPage) {
+    if (newPage >= 1 && newPage <= totalPages) {
+      pageNumber = newPage;
+      fetchPlayers();
     }
   }
 
@@ -28,6 +38,7 @@
     fetchPlayers();
   });
   $: console.log(players);
+  $: console.log(totalPages);
 </script>
 
 <main>
@@ -76,6 +87,38 @@
           </div>
         </div>
       {/each}
+    </div>
+
+    <div class="pagination">
+      <button
+        class="page-btn"
+        on:click={() => changePage(pageNumber - 1)}
+        disabled={pageNumber === 1}
+      >
+        ‹
+      </button>
+
+      {#each Array(Math.min(5, totalPages)) as _, i}
+        {@const page =
+          Math.max(1, Math.min(totalPages - 4, pageNumber - 2)) + i}
+        {#if page <= totalPages}
+          <button
+            class="page-btn"
+            class:active={page === pageNumber}
+            on:click={() => changePage(page)}
+          >
+            {page}
+          </button>
+        {/if}
+      {/each}
+
+      <button
+        class="page-btn"
+        on:click={() => changePage(pageNumber + 1)}
+        disabled={pageNumber === totalPages}
+      >
+        ›
+      </button>
     </div>
   </div>
 </main>
@@ -159,6 +202,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 2rem;
+    margin-bottom: 3rem;
   }
   .player-card {
     background: rgba(255, 255, 255, 0.95);
@@ -262,6 +306,35 @@
   .age,
   .matches {
     font-weight: 500;
+  }
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .page-btn {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #182768;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  .page-btn:hover:not(:disabled) {
+    background: #182768;
+    color: white;
+    transform: translateY(-2px);
+  }
+  .page-btn.active {
+    background: #182768;
+    color: white;
+  }
+  .page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
   @media (max-width: 768px) {
     .container {
