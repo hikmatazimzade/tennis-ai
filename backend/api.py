@@ -308,7 +308,7 @@ def get_player_data(player_id: int) -> dict:
 
 
 @app.get("/players")
-def get_players_data(page: int=1) -> List[dict]:
+def get_players_data(page: int=1) -> dict:
     page -= 1
     curr_ids = SORTED_PLAYER_IDS[
         page * PAGE_LIMIT:(page + 1) * PAGE_LIMIT
@@ -317,7 +317,10 @@ def get_players_data(page: int=1) -> List[dict]:
     preview_data = [get_preview_statistics_dict(PLAYER_DATA_DICT[id], id)
                                 for id in curr_ids]
     logger.info(f"Preview Data: {preview_data}")
-    return preview_data
+    return {
+        "data": preview_data,
+        "total_page_number": len(SORTED_PLAYER_IDS) // PAGE_LIMIT
+    }
 
 
 if __name__ == '__main__':
