@@ -308,7 +308,11 @@ def get_player_data(player_id: int) -> dict:
 
 
 @app.get("/players")
-def get_players_data(page: int=1) -> dict:
+def get_players_data(page: int=1) -> dict | list:
+    if page == -1:
+        return [get_preview_statistics_dict(PLAYER_DATA_DICT[id], id)
+                                for id in SORTED_PLAYER_IDS]
+
     page -= 1
     curr_ids = SORTED_PLAYER_IDS[
         page * PAGE_LIMIT:(page + 1) * PAGE_LIMIT
