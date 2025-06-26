@@ -45,6 +45,8 @@ H2H_DICT = get_head_to_head_dict(BOOSTING_DF)
 SURFACE_H2H_DICT = get_surface_head_to_head_dict(BOOSTING_DF)
 
 IOC_DICT = get_ioc_dict()
+SORTED_PLAYER_IDS = sorted(PLAYER_DATA_DICT,
+                           key=lambda id: PLAYER_DATA_DICT[id].original_rank)
 
 
 if __name__ == '__main__':

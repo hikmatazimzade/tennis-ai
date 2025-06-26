@@ -31,6 +31,7 @@ MODEL = CatBoostClassifier()
 MODEL.load_model(f'{ROOT_DIR}/models/catboost_model.cbm')
 
 logger = get_logger("backend.api")
+print(SORTED_PLAYER_IDS[:10])
 
 
 class Prediction(BaseModel):
