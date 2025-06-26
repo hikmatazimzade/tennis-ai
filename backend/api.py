@@ -243,10 +243,10 @@ def get_main_statistics_dict(player: Player,
     ioc = IOC_DICT.get(player_id, "Unknown")
     hand = get_player_hand_text(player)
 
-    original_rank, rank_points = player.original_rank, player.rank_points
+    original_rank, rank_points = player.original_rank, int(player.rank_points)
     age, height = player.age, player.ht
 
-    elo, win_ratio = player.elo, player.win_ratio
+    elo, win_ratio = int(player.elo), round(player.win_ratio *100, 1)
     won_match, total_match = player.won_match, player.total_match
 
     lost_match = total_match - won_match
@@ -265,8 +265,8 @@ def get_preview_statistics_dict(player: Player,
     name = player.name
     ioc = IOC_DICT.get(player_id, "Unknown")
 
-    original_rank, rank_points = player.original_rank, player.rank_points
-    elo, win_ratio = player.elo, player.win_ratio
+    original_rank, rank_points = player.original_rank, int(player.rank_points)
+    elo, win_ratio = int(player.elo), round(player.win_ratio * 100, 1)
 
     age = player.age
     total_match = player.total_match
