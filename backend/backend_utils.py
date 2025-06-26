@@ -2,9 +2,9 @@ from typing import List, Iterable, Tuple
 
 import pandas as pd
 
-from utils.feature_helpers import (
-    get_surface_name_by_row,
-)
+from utils.feature_helpers import get_surface_name_by_row
+from config import ROOT_DIR
+
 
 EXCLUDED_FEATURES = [
     "_id", "_seed", "_ioc", "_ace", "_df", "_svpt", "_1stIn", "_1stWon",
@@ -110,3 +110,16 @@ def get_surface_player_val(player: Player, player_col: str) -> float | int:
         player_val = 0
 
     return player_val
+
+
+def get_ioc_dict(
+        csv_path: str=f"{ROOT_DIR}/data/atp_players.csv") -> dict:
+    df = pd.read_csv(csv_path)
+    ioc_dict = {}
+
+    for row in df.itertuples():
+        id, ioc = row.player_id, row.ioc
+        if ioc and id not in ioc_dict:
+            ioc_dict[id] = ioc
+
+    return ioc_dict
