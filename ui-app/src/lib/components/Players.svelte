@@ -1,9 +1,33 @@
 <script>
   import { goto } from "$app/navigation";
+  import { onMount } from "svelte";
 
   function navigateToPlayer(playerId) {
     goto(`/players/${playerId}`);
   }
+
+  let players = [];
+  $: pageNumber = 1;
+
+  async function fetchPlayers() {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/players?page=${pageNumber}`
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP Error Status!: ${response.status}`);
+      }
+      players = await response.json();
+    } catch (err) {
+      errorMessage = err.message;
+      console.log(`Error Message: ${error}`);
+    }
+  }
+
+  onMount(() => {
+    fetchPlayers();
+  });
+  $: console.log(players);
 </script>
 
 <main>
@@ -23,174 +47,35 @@
       </div>
     </div>
     <div class="players-grid">
-      <!-- Player Card 1 -->
-      <div class="player-card" on:click={() => navigateToPlayer(1)}>
-        <div class="card-header">
-          <div class="player-info">
-            <h3 class="player-name">Novak Djokovic</h3>
-            <div class="player-country">🇷🇸 SRB</div>
+      {#each players as player}
+        <div class="player-card" on:click={() => navigateToPlayer(player.id)}>
+          <div class="card-header">
+            <div class="player-info">
+              <h3 class="player-name">{player.name}</h3>
+              <div class="player-country">{player.ioc}</div>
+            </div>
+            <div class="rank-badge">#{player.rank}</div>
           </div>
-          <div class="rank-badge">#1</div>
-        </div>
-        <div class="stats-preview">
-          <div class="stat">
-            <span class="stat-value">82.5%</span>
-            <span class="stat-label">Win Rate</span>
+          <div class="stats-preview">
+            <div class="stat">
+              <span class="stat-value">{player.win_rate}%</span>
+              <span class="stat-label">Win Rate</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">{player.elo}</span>
+              <span class="stat-label">ELO</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">{player.rank_points}</span>
+              <span class="stat-label">Points</span>
+            </div>
           </div>
-          <div class="stat">
-            <span class="stat-value">2435</span>
-            <span class="stat-label">ELO</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">9,945</span>
-            <span class="stat-label">Points</span>
-          </div>
-        </div>
-        <div class="additional-info">
-          <span class="age">36 years</span>
-          <span class="matches">1,289 matches</span>
-        </div>
-      </div>
-      <!-- Player Card 2 -->
-      <div class="player-card" on:click={() => navigateToPlayer(2)}>
-        <div class="card-header">
-          <div class="player-info">
-            <h3 class="player-name">Carlos Alcaraz</h3>
-            <div class="player-country">🇪🇸 ESP</div>
-          </div>
-          <div class="rank-badge">#2</div>
-        </div>
-        <div class="stats-preview">
-          <div class="stat">
-            <span class="stat-value">82.1%</span>
-            <span class="stat-label">Win Rate</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">2401</span>
-            <span class="stat-label">ELO</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">8,855</span>
-            <span class="stat-label">Points</span>
+          <div class="additional-info">
+            <span class="age">{player.age} years</span>
+            <span class="matches">{player.total_match} matches</span>
           </div>
         </div>
-        <div class="additional-info">
-          <span class="age">21 years</span>
-          <span class="matches">246 matches</span>
-        </div>
-      </div>
-      <!-- Player Card 3 -->
-      <div class="player-card" on:click={() => navigateToPlayer(3)}>
-        <div class="card-header">
-          <div class="player-info">
-            <h3 class="player-name">Jannik Sinner</h3>
-            <div class="player-country">🇮🇹 ITA</div>
-          </div>
-          <div class="rank-badge">#3</div>
-        </div>
-        <div class="stats-preview">
-          <div class="stat">
-            <span class="stat-value">83.7%</span>
-            <span class="stat-label">Win Rate</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">2367</span>
-            <span class="stat-label">ELO</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">8,270</span>
-            <span class="stat-label">Points</span>
-          </div>
-        </div>
-        <div class="additional-info">
-          <span class="age">23 years</span>
-          <span class="matches">312 matches</span>
-        </div>
-      </div>
-      <!-- Player Card 4 -->
-      <div class="player-card" on:click={() => navigateToPlayer(4)}>
-        <div class="card-header">
-          <div class="player-info">
-            <h3 class="player-name">Daniil Medvedev</h3>
-            <div class="player-country">🇷🇺 RUS</div>
-          </div>
-          <div class="rank-badge">#4</div>
-        </div>
-        <div class="stats-preview">
-          <div class="stat">
-            <span class="stat-value">77.6%</span>
-            <span class="stat-label">Win Rate</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">2298</span>
-            <span class="stat-label">ELO</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">7,555</span>
-            <span class="stat-label">Points</span>
-          </div>
-        </div>
-        <div class="additional-info">
-          <span class="age">28 years</span>
-          <span class="matches">478 matches</span>
-        </div>
-      </div>
-      <!-- Player Card 5 -->
-      <div class="player-card" on:click={() => navigateToPlayer(5)}>
-        <div class="card-header">
-          <div class="player-info">
-            <h3 class="player-name">Rafael Nadal</h3>
-            <div class="player-country">🇪🇸 ESP</div>
-          </div>
-          <div class="rank-badge">#154</div>
-        </div>
-        <div class="stats-preview">
-          <div class="stat">
-            <span class="stat-value">82.6%</span>
-            <span class="stat-label">Win Rate</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">2145</span>
-            <span class="stat-label">ELO</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">380</span>
-            <span class="stat-label">Points</span>
-          </div>
-        </div>
-        <div class="additional-info">
-          <span class="age">38 years</span>
-          <span class="matches">1,308 matches</span>
-        </div>
-      </div>
-      <!-- Player Card 6 -->
-      <div class="player-card" on:click={() => navigateToPlayer(6)}>
-        <div class="card-header">
-          <div class="player-info">
-            <h3 class="player-name">Coco Gauff</h3>
-            <div class="player-country">🇺🇸 USA</div>
-          </div>
-          <div class="rank-badge">#3</div>
-        </div>
-        <div class="stats-preview">
-          <div class="stat">
-            <span class="stat-value">75.1%</span>
-            <span class="stat-label">Win Rate</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">2201</span>
-            <span class="stat-label">ELO</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">5,230</span>
-            <span class="stat-label">Points</span>
-          </div>
-        </div>
-        <div class="additional-info">
-          <span class="age">20 years</span>
-          <span class="matches">189 matches</span>
-        </div>
-      </div>
+      {/each}
     </div>
   </div>
 </main>
