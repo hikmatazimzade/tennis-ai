@@ -1,11 +1,11 @@
 <script>
   import { page } from "$app/stores";
   import { playerNames } from "$lib/index";
-  import PlayerStatisticsId from "$lib/components/PlayerStatisticsId.svelte";
+  import Player from "$lib/components/Player.svelte";
 
   let playerId = $page.params.id;
 </script>
 
 <main>
-  <PlayerStatisticsId {playerId} {playerNames} />
+  <Player {playerId} {playerNames} />
 </main>

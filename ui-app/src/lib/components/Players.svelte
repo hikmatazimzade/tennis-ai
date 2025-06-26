@@ -2,7 +2,7 @@
   import { goto } from "$app/navigation";
 
   function navigateToPlayer(playerId) {
-    goto(`/player_statistics/${playerId}`);
+    goto(`/players/${playerId}`);
   }
 </script>
 
