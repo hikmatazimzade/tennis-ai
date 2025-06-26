@@ -1,16 +1,18 @@
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Dict
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
 from catboost import CatBoostClassifier
 import numpy as np
+import pandas as pd
 
 from backend.storage import (
     PLAYER_DATA_DICT,
     H2H_DICT,
     SURFACE_H2H_DICT,
-    PREDICTION_COLUMNS
+    PREDICTION_COLUMNS,
+    IOC_DICT
 )
 
 from backend.backend_utils import Player, get_surface_player_val
@@ -216,6 +218,33 @@ def get_model_output(prediction_array: np.array) -> Tuple[int, float]:
     return winner_player, confidence_percent
 
 
+def get_player_hand_text(player: Player) -> str:
+    if player.hand_L and player.hand_R:
+        return "Both-handed"
+    elif player.hand_L:
+        return "Left-handed"
+    else:
+        return "Right-handed"
+
+
+def get_main_statistics_dict(player: Player,
+                        player_id: int) -> Dict[str, Union[str, float]]:
+    name = player.name
+    ioc = IOC_DICT.get(player_id, "Unknown")
+    hand = get_player_hand_text(player)
+
+    original_rank, rank_points = player.original_rank, player.rank_points
+    age, height = player.age, player.ht
+
+    elo = player.elo
+
+    return {
+        "name": name, "ioc": ioc, "rank": original_rank,
+        "hand": hand, "age": age, "height": height,
+        "rank_points": rank_points, "elo": elo
+    }
+
+
 @app.post("/prediction")
 def prediction(prediction: Prediction) -> dict:
     player_1_id, player_2_id = prediction.player_1_id, prediction.player_2_id
@@ -231,6 +260,18 @@ def prediction(prediction: Prediction) -> dict:
         "winner_player": winner_player,
         "confidence": confidence_percent
     }
+
+
+@app.get("/player_statistics/{player_id}")
+def get_player_statistics(player_id: int):
+    if player_id not in PLAYER_DATA_DICT:
+        raise HTTPException(status_code=404,
+                            detail=f"Player {player_id} doesn't exist!")
+
+    player = PLAYER_DATA_DICT[player_id]
+    main_statistics_dict = get_main_statistics_dict(player, player_id)
+
+    return main_statistics_dict
 
 
 if __name__ == '__main__':

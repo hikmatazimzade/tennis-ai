@@ -2,7 +2,8 @@ from backend.backend_utils import (
     get_player_column_names,
     get_final_player_columns,
     get_player_data_dict,
-    add_surface_attributes
+    add_surface_attributes,
+    get_ioc_dict
 )
 
 from utils.dataframe import (
@@ -42,6 +43,8 @@ add_surface_attributes(BOOSTING_DF, PLAYER_DATA_DICT,
 
 H2H_DICT = get_head_to_head_dict(BOOSTING_DF)
 SURFACE_H2H_DICT = get_surface_head_to_head_dict(BOOSTING_DF)
+
+IOC_DICT = get_ioc_dict()
 
 
 if __name__ == '__main__':
