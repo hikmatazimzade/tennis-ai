@@ -12,7 +12,7 @@ from backend.storage import (
     SURFACE_H2H_DICT,
     PREDICTION_COLUMNS,
     IOC_DICT,
-    SORTED_PLAYER_IDS
+    SORTED_PLAYER_IDS,
 )
 
 from backend.backend_utils import Player, get_surface_player_val
@@ -30,8 +30,9 @@ TOURNEY_DAY = 15
 MODEL = CatBoostClassifier()
 MODEL.load_model(f'{ROOT_DIR}/models/catboost_model.cbm')
 
+PAGE_LIMIT = 24
+
 logger = get_logger("backend.api")
-print(SORTED_PLAYER_IDS[:10])
 
 
 class Prediction(BaseModel):
@@ -250,6 +251,7 @@ def get_main_statistics_dict(player: Player,
         "lost_match": lost_match, "total_match": total_match
     }
 
+
 def get_preview_statistics_dict(player: Player,
                             player_id: int) -> Dict[str, Union[str, float]]:
     name = player.name
@@ -264,7 +266,7 @@ def get_preview_statistics_dict(player: Player,
     return {
         "name": name, "ioc": ioc, "rank": original_rank, "elo": elo,
         "win_rate": win_ratio, "rank_points": rank_points,
-        "age": age, "total_match": total_match
+        "age": age, "total_match": total_match, "id": player_id
     }
 
 
@@ -286,7 +288,7 @@ def prediction(prediction: Prediction) -> dict:
 
 
 @app.get("/player_statistics/{player_id}")
-def get_player_statistics(player_id: int):
+def get_player_statistics(player_id: int) -> dict:
     if player_id not in PLAYER_DATA_DICT:
         raise HTTPException(status_code=404,
                             detail=f"Player {player_id} doesn't exist!")
@@ -295,6 +297,19 @@ def get_player_statistics(player_id: int):
     main_statistics_dict = get_main_statistics_dict(player, player_id)
 
     return main_statistics_dict
+
+
+@app.get("/players_statistics/{page_number}")
+def get_players_statistics(page_number: int) -> List[dict]:
+    page_number -= 1
+    curr_ids = SORTED_PLAYER_IDS[
+        page_number * PAGE_LIMIT:(page_number + 1) * PAGE_LIMIT
+    ]
+
+    preview_data = [get_preview_statistics_dict(PLAYER_DATA_DICT[id], id)
+                                for id in curr_ids]
+    logger.info(f"Preview Data: {preview_data}")
+    return preview_data
 
 
 if __name__ == '__main__':
