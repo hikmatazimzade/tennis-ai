@@ -202,7 +202,7 @@ def get_prediction_array(prediction_data: PredictionData) -> np.array:
 
 def get_model_output(prediction_array: np.array) -> Tuple[int, float]:
     player_1_won = MODEL.predict(prediction_array)
-    logger.debug(f"Raw Winner Prediction: {player_1_won[0]}")
+    logger.debug(f"Raw Player 1 Won Prediction: {player_1_won[0]}")
 
     probabilities = MODEL.predict_proba(prediction_array)
     confidence_score = np.max(probabilities[0])
