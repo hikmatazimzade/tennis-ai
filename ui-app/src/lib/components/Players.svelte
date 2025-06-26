@@ -6,9 +6,26 @@
     goto(`/players/${playerId}`);
   }
 
-  let players = [];
+  let currentPlayers = [];
+  let paginatedPlayers = [];
+  let allPlayers = [];
+  let searchText = "";
+
   $: pageNumber = 1;
   let totalPages = 0;
+
+  async function fetchAllPlayers() {
+    try {
+      const response = await fetch("http://localhost:8000/players?page=-1");
+      if (!response.ok) {
+        throw new Error(`HTTP Error Status!: ${response.status}`);
+      }
+      allPlayers = await response.json();
+    } catch (err) {
+      let errorMessage = err.message;
+      console.log(`Error Message: ${errorMessage}`);
+    }
+  }
 
   async function fetchPlayers() {
     try {
@@ -19,12 +36,26 @@
         throw new Error(`HTTP Error Status!: ${response.status}`);
       }
       let playersData = await response.json();
-      players = playersData.data;
+      paginatedPlayers = playersData.data;
+      currentPlayers = paginatedPlayers;
       totalPages = playersData.total_page_number;
     } catch (err) {
       let errorMessage = err.message;
       console.log(`Error Message: ${errorMessage}`);
     }
+  }
+
+  function searchPlayers() {
+    if (searchText === "") {
+      currentPlayers = paginatedPlayers;
+    } else {
+      currentPlayers = allPlayers.filter(
+        (player) =>
+          player.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          player.ioc.toLowerCase().includes(searchText.toLowerCase())
+      );
+    }
+    console.log(searchText);
   }
 
   function changePage(newPage) {
@@ -36,9 +67,12 @@
 
   onMount(() => {
     fetchPlayers();
+    fetchAllPlayers();
   });
-  $: console.log(players);
+
+  $: console.log(paginatedPlayers);
   $: console.log(totalPages);
+  $: console.log(allPlayers);
 </script>
 
 <main>
@@ -52,13 +86,15 @@
         <div class="search-icon">🔍</div>
         <input
           type="text"
-          placeholder="Search players by name, country, or ranking..."
+          placeholder="Search players by name or country"
           class="search-input"
+          bind:value={searchText}
+          on:input={searchPlayers}
         />
       </div>
     </div>
     <div class="players-grid">
-      {#each players as player}
+      {#each currentPlayers as player}
         <div class="player-card" on:click={() => navigateToPlayer(player.id)}>
           <div class="card-header">
             <div class="player-info">
@@ -89,37 +125,39 @@
       {/each}
     </div>
 
-    <div class="pagination">
-      <button
-        class="page-btn"
-        on:click={() => changePage(pageNumber - 1)}
-        disabled={pageNumber === 1}
-      >
-        ‹
-      </button>
+    {#if searchText === ""}
+      <div class="pagination">
+        <button
+          class="page-btn"
+          on:click={() => changePage(pageNumber - 1)}
+          disabled={pageNumber === 1}
+        >
+          ‹
+        </button>
 
-      {#each Array(Math.min(5, totalPages)) as _, i}
-        {@const page =
-          Math.max(1, Math.min(totalPages - 4, pageNumber - 2)) + i}
-        {#if page <= totalPages}
-          <button
-            class="page-btn"
-            class:active={page === pageNumber}
-            on:click={() => changePage(page)}
-          >
-            {page}
-          </button>
-        {/if}
-      {/each}
+        {#each Array(Math.min(5, totalPages)) as _, i}
+          {@const page =
+            Math.max(1, Math.min(totalPages - 4, pageNumber - 2)) + i}
+          {#if page <= totalPages}
+            <button
+              class="page-btn"
+              class:active={page === pageNumber}
+              on:click={() => changePage(page)}
+            >
+              {page}
+            </button>
+          {/if}
+        {/each}
 
-      <button
-        class="page-btn"
-        on:click={() => changePage(pageNumber + 1)}
-        disabled={pageNumber === totalPages}
-      >
-        ›
-      </button>
-    </div>
+        <button
+          class="page-btn"
+          on:click={() => changePage(pageNumber + 1)}
+          disabled={pageNumber === totalPages}
+        >
+          ›
+        </button>
+      </div>
+    {/if}
   </div>
 </main>
 
