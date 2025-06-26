@@ -256,7 +256,7 @@ class PhysicalEngineering(FeatureEngineeringBase):
                                - self.df["player_2_age"])
 
     def add_height_diff(self) -> None:
-        self.df["height_diff"] = (self.df["player_1_ht"]
+        self.df["ht_diff"] = (self.df["player_1_ht"]
                                   - self.df["player_2_ht"])
 
 
@@ -461,7 +461,7 @@ class MatchFeatureDifferenceEngineering(FeatureEngineeringBase):
 
     def add_last_won_match_diff(self) -> None:
         for idx, num in enumerate(self.last_n_matches, start=2):
-            self.df[f"last_{num}_match_diff"] = (
+            self.df[f"last_{num}_match_won_diff"] = (
                                 self.df[f"player_1_last_{num}_match_won"]
                                 - self.df[f"player_2_last_{num}_match_won"])
 
