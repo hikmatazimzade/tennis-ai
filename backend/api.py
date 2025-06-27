@@ -278,16 +278,32 @@ def get_preview_statistics_dict(player: Player,
     }
 
 
+def handle_reverse_order(prediction: Prediction) -> None:
+    prediction.player_1_id, prediction.player_2_id = (
+        prediction.player_2_id, prediction.player_1_id
+    )
+
+    prediction.player_1_entry, prediction.player_2_entry = (
+        prediction.player_2_entry, prediction.player_1_entry
+    )
+
+
 @app.post("/prediction")
 def prediction(prediction: Prediction) -> dict:
-    player_1_id, player_2_id = prediction.player_1_id, prediction.player_2_id
-    player_1 = PLAYER_DATA_DICT[player_1_id]
-    player_2 = PLAYER_DATA_DICT[player_2_id]
+    reverse_order = False
+    if prediction.player_1_id < prediction.player_2_id:
+        reverse_order = True
+        handle_reverse_order(prediction)
+
+    player_1 = PLAYER_DATA_DICT[prediction.player_1_id]
+    player_2 = PLAYER_DATA_DICT[prediction.player_2_id]
 
     prediction_data = get_prediction_data(player_1, player_2, prediction)
     prediction_array = get_prediction_array(prediction_data)
 
     winner_player, confidence_percent = get_model_output(prediction_array)
+    if reverse_order:
+        winner_player = 2 if winner_player == 1 else 1
 
     return {
         "winner_player": winner_player,
