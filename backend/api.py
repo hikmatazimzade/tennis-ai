@@ -327,5 +327,10 @@ def get_players_data(page: int=1) -> dict | list:
     }
 
 
+@app.get("/players-lookup")
+def players_lookup() -> List[Dict[str, int]]:
+    return [{PLAYER_DATA_DICT[id].name: id} for id in SORTED_PLAYER_IDS]
+
+
 if __name__ == '__main__':
     uvicorn.run(app, host="0.0.0.0")
