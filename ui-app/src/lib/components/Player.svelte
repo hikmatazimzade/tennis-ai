@@ -2,7 +2,6 @@
   import { onMount } from "svelte";
 
   export let playerId;
-  export let playerNames;
 
   let player = {};
 

@@ -1,5 +1,36 @@
 <script>
-  // TODO: Add prediction functions here
+  import { onMount } from "svelte";
+
+  let playersLookup = [];
+
+  let player1InputName = "Novak Djokovic";
+  let player2InputName = "Pete Sampras";
+
+  let player1Id = 104925;
+  let player2Id = 101948;
+
+  let inputSurface = "hard";
+  let inputTournamentLevel = "A";
+  let inputDrawSize = 64;
+
+  async function fetchPlayersLookup() {
+    try {
+      const response = await fetch("http://localhost:8000/players-lookup");
+      if (!response.ok) {
+        throw new Error(`HTTP Error Status!: ${response.status}`);
+      }
+      playersLookup = await response.json();
+    } catch (err) {
+      let errorMessage = err.message;
+      console.log(`Error Message: ${errorMessage}`);
+    }
+  }
+
+  onMount(() => {
+    fetchPlayersLookup();
+  });
+
+  $: console.log(playersLookup);
 </script>
 
 <main>
@@ -9,7 +40,6 @@
       <p>AI-powered predictions for professional tennis matches</p>
     </div>
     <div class="prediction-section">
-      <!-- Input Card -->
       <div class="input-card">
         <div class="players-input">
           <div class="player-input-section">
@@ -20,6 +50,18 @@
               placeholder="Enter player name"
               value="Novak Djokovic"
             />
+            <div class="entry-group">
+              <label class="entry-label">Entry Type</label>
+              <select class="entry-select">
+                <option value="ALT" selected>Alternate (ALT)</option>
+                <option value="Alt">Alternate (Alt)</option>
+                <option value="LL">Lucky Loser (LL)</option>
+                <option value="PR">Protected Ranking (PR)</option>
+                <option value="Q">Qualifier (Q)</option>
+                <option value="SE">Special Exempt (SE)</option>
+                <option value="WC">Wild Card (WC)</option>
+              </select>
+            </div>
           </div>
           <div class="vs-divider">VS</div>
           <div class="player-input-section">
@@ -30,13 +72,25 @@
               placeholder="Enter player name"
               value="Carlos Alcaraz"
             />
+            <div class="entry-group">
+              <label class="entry-label">Entry Type</label>
+              <select class="entry-select">
+                <option value="ALT" selected>Alternate (ALT)</option>
+                <option value="Alt">Alternate (Alt)</option>
+                <option value="LL">Lucky Loser (LL)</option>
+                <option value="PR">Protected Ranking (PR)</option>
+                <option value="Q">Qualifier (Q)</option>
+                <option value="SE">Special Exempt (SE)</option>
+                <option value="WC">Wild Card (WC)</option>
+              </select>
+            </div>
           </div>
         </div>
         <div class="match-details">
           <div class="input-group">
             <label class="input-label">Surface</label>
             <select class="select-input">
-              <option value="hard">Hard Court</option>
+              <option value="hard" selected>Hard Court</option>
               <option value="clay">Clay Court</option>
               <option value="grass">Grass Court</option>
               <option value="carpet">Carpet</option>
@@ -45,18 +99,18 @@
           <div class="input-group">
             <label class="input-label">Tournament Level</label>
             <select class="select-input">
-              <option value="grand-slam">Grand Slam</option>
-              <option value="masters-1000">Masters 1000</option>
-              <option value="atp-500">ATP 500</option>
-              <option value="atp-250">ATP 250</option>
-              <option value="davis-cup">Davis Cup</option>
+              <option value="A" selected>ATP Tour (A)</option>
+              <option value="D">Davis Cup (D)</option>
+              <option value="F">Tour Finals (F)</option>
+              <option value="G">Grand Slam (G)</option>
+              <option value="M">Masters (M)</option>
             </select>
           </div>
           <div class="input-group">
             <label class="input-label">Draw Size</label>
             <select class="select-input">
               <option value="128">128 Players</option>
-              <option value="64">64 Players</option>
+              <option value="64" selected>64 Players</option>
               <option value="32">32 Players</option>
               <option value="16">16 Players</option>
             </select>
@@ -82,11 +136,11 @@
             <div class="summary-label">Surface</div>
           </div>
           <div class="summary-item">
-            <div class="summary-value">Grand Slam</div>
+            <div class="summary-value">ATP Tour</div>
             <div class="summary-label">Tournament</div>
           </div>
           <div class="summary-item">
-            <div class="summary-value">128 Players</div>
+            <div class="summary-value">64 Players</div>
             <div class="summary-label">Draw Size</div>
           </div>
         </div>
@@ -189,12 +243,42 @@
     outline: none;
     text-align: center;
     font-weight: 600;
+    box-sizing: border-box;
   }
   .player-input:focus {
     border-color: #182768;
     background: white;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(24, 39, 104, 0.1);
+  }
+  .entry-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+  }
+  .entry-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+  .entry-select {
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+    text-align: center;
+  }
+  .entry-select:focus {
+    border-color: #182768;
+    box-shadow: 0 0 0 3px rgba(24, 39, 104, 0.1);
   }
   .vs-divider {
     display: flex;
