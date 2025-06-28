@@ -3,3 +3,6 @@ myvenv/
 notes.txt
 __pycache__/
 .venv/
+
+ui-app/.svelte-kit/
+ui-app/node_modules/
