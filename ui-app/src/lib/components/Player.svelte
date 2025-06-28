@@ -1,5 +1,6 @@
 <script>
   import { onMount } from "svelte";
+  import { BACKEND_BASE_URL } from "../index";
 
   export let playerId;
 
@@ -7,7 +8,7 @@
 
   async function fetchPlayer(playerId) {
     try {
-      const response = await fetch(`http://localhost:8000/players/${playerId}`);
+      const response = await fetch(`${BACKEND_BASE_URL}/players/${playerId}`);
       if (!response.ok) {
         throw new Error(`HTTP Error Status!: ${response.status}`);
       }

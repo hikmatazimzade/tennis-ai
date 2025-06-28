@@ -1,2 +1,2 @@
 // place files you want to import through the `$lib` alias in this folder.
-export let playerNames = ["Djokovic", "Rafael"];
+export const BACKEND_BASE_URL = "http://localhost:8000";

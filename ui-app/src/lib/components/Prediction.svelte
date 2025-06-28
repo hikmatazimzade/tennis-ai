@@ -1,5 +1,6 @@
 <script>
   import { onMount } from "svelte";
+  import { BACKEND_BASE_URL } from "../index";
 
   let playersLookup = [];
   let player1Input = "Novak Djokovic";
@@ -30,7 +31,7 @@
 
   async function fetchPlayersLookup() {
     try {
-      const response = await fetch("http://localhost:8000/players-lookup");
+      const response = await fetch(`${BACKEND_BASE_URL}/players-lookup`);
       if (!response.ok) {
         throw new Error(`HTTP Error Status!: ${response.status}`);
       }
@@ -166,7 +167,7 @@
     isLoading = true;
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/prediction", {
+      const response = await fetch(`${BACKEND_BASE_URL}/prediction`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

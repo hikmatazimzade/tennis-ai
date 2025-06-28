@@ -2,9 +2,12 @@
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
 
+  import { BACKEND_BASE_URL } from "../index";
+
   function navigateToPlayer(playerId) {
     goto(`/players/${playerId}`);
   }
+  console.log(BACKEND_BASE_URL);
 
   let currentPlayers = [];
   let paginatedPlayers = [];
@@ -16,7 +19,7 @@
 
   async function fetchAllPlayers() {
     try {
-      const response = await fetch("http://localhost:8000/players?page=-1");
+      const response = await fetch(`${BACKEND_BASE_URL}/players?page=-1`);
       if (!response.ok) {
         throw new Error(`HTTP Error Status!: ${response.status}`);
       }
@@ -30,7 +33,7 @@
   async function fetchPlayers() {
     try {
       const response = await fetch(
-        `http://localhost:8000/players?page=${pageNumber}`
+        `${BACKEND_BASE_URL}/players?page=${pageNumber}`
       );
       if (!response.ok) {
         throw new Error(`HTTP Error Status!: ${response.status}`);
