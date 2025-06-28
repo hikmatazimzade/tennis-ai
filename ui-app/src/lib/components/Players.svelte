@@ -79,6 +79,23 @@
 </script>
 
 <main>
+  <nav class="top-nav">
+    <a href="/prediction" class="nav-link">
+      <svg
+        class="nav-icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <circle cx="12" cy="12" r="10"></circle>
+        <circle cx="12" cy="12" r="6"></circle>
+        <circle cx="12" cy="12" r="2"></circle>
+      </svg>
+      <span class="nav-text">Prediction</span>
+    </a>
+  </nav>
+
   <div class="container">
     <div class="header">
       <h1>Tennis Player Search</h1>
@@ -183,6 +200,7 @@
     max-width: 1400px;
     margin: 0 auto;
     padding: 2rem;
+    padding-top: 3rem;
   }
   .header {
     text-align: center;
@@ -414,6 +432,113 @@
     .rank-badge {
       align-self: flex-end;
       width: fit-content;
+    }
+  }
+
+  .top-nav {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    z-index: 1000;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #182768;
+    text-decoration: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 50px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .nav-link::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(24, 39, 104, 0.1),
+      transparent
+    );
+    transition: left 0.6s ease;
+  }
+
+  .nav-link:hover::before {
+    left: 100%;
+  }
+
+  .nav-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(24, 39, 104, 0.2);
+    color: #764ba2;
+  }
+
+  .nav-icon {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s ease;
+  }
+
+  .nav-link:hover .nav-icon {
+    transform: scale(1.1);
+  }
+
+  .nav-text {
+    position: relative;
+    z-index: 1;
+  }
+
+  .container {
+    padding-top: 3rem;
+  }
+
+  @media (max-width: 768px) {
+    .top-nav {
+      top: 1rem;
+      right: 1rem;
+    }
+
+    .nav-link {
+      padding: 0.625rem 1rem;
+      font-size: 0.8rem;
+    }
+
+    .nav-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .container {
+      padding-top: 4rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .top-nav {
+      position: relative;
+      top: auto;
+      right: auto;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      padding-top: 1rem;
     }
   }
 </style>
