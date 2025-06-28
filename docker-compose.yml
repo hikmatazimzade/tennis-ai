@@ -1,0 +1,38 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: fastapi-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+    volumes:
+      # Mount the entire project directory for hot reloading
+      - .:/app
+      # Exclude directories that shouldn't be synced
+      - /app/.venv
+      - /app/ui-app/node_modules
+      - /app/.git
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ui-app/Dockerfile
+    container_name: svelte-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - PUBLIC_API_URL=http://backend:8000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
