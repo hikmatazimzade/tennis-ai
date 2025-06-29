@@ -2,6 +2,9 @@
 
 A machine learning-powered tennis match prediction system that analyzes player statistics, historical performance, and match conditions to predict match outcomes with confidence scores.
 
+## 🎥 Demo Video
+https://github.com/user-attachments/assets/74e32a06-c6bf-44c8-b873-169983571883
+
 ## 🚀 Features
 
 - **Advanced ML Models**: Three trained models (CatBoost, XGBoost, Random Forest) for accurate match predictions
