@@ -379,8 +379,12 @@
           </div>
         {:else if predictionResult}
           <div class="winner-section">
-            <div class="winner-label">Predicted Winner Number</div>
-            <div class="winner-name">{predictionResult.winner}</div>
+            <div class="winner-label">Predicted Winner</div>
+            {#if predictionResult.winner === 1}
+              <div class="winner-name">{player1Input}</div>
+            {:else}
+              <div class="winner-name">{player2Input}</div>
+            {/if}
           </div>
           <div class="confidence-section">
             <div class="confidence-label">Confidence Score</div>
