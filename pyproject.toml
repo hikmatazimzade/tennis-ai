@@ -3,16 +3,23 @@ name = "tennis-ai"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
+    # Machine Learning
     "catboost>=1.2.8",
-    "fastapi>=0.115.14",
-    "ipywidgets>=8.1.7",
-    "matplotlib>=3.10.3",
-    "notebook>=7.4.3",
-    "numpy>=2.3.1",
-    "pandas>=2.3.0",
-    "pydantic>=2.11.7",
-    "scikit-learn>=1.7.0",
-    "seaborn>=0.13.2",
-    "uvicorn>=0.35.0",
     "xgboost>=3.0.2",
+    "scikit-learn>=1.7.0",
+
+    # Data Processing
+    "pandas>=2.3.0",
+    "numpy>=2.3.1",
+
+    # Data Visualization
+    "matplotlib>=3.10.3",
+    "seaborn>=0.13.2",
+    "ipywidgets>=8.1.7",
+    "notebook>=7.4.3",
+
+    # Backend
+    "fastapi>=0.115.14",
+    "pydantic>=2.11.7",
+    "uvicorn>=0.35.0",
 ]
