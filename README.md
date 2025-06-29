@@ -13,7 +13,7 @@ A machine learning-powered tennis match prediction system that analyzes player s
 
 ## 🤖 Model Performance
 
-Our system uses three different machine learning models, with CatBoost as the default:
+The system uses three different machine learning models, with CatBoost as the default:
 
 | Model | Accuracy | ROC AUC | Log Loss |
 |-------|----------|---------|----------|
@@ -60,7 +60,7 @@ The models are trained on 137 carefully engineered features including:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/tennis-ai.git
+   git clone https://github.com/hikmatazimzade/tennis-ai.git
    cd tennis-ai
    ```
 
@@ -78,7 +78,7 @@ The models are trained on 137 carefully engineered features including:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/tennis-ai.git
+   git clone https://github.com/hikmatazimzade/tennis-ai.git
    cd tennis-ai
    ```
 
@@ -114,7 +114,7 @@ The models are trained on 137 carefully engineered features including:
 
 ## 🤝 Contributing
 
-We welcome contributions! Whether it's improving the ML models, adding new features, or enhancing the UI, your input is valuable.
+All contributions are welcome! Whether it's improving the ML models, adding new features, or enhancing the UI, your input is valuable.
 
 1. Fork the repository
 2. Create a feature branch
