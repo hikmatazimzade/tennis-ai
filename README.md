@@ -35,6 +35,9 @@ The models are trained on 137 carefully engineered features including:
 - **Ranking & Elo**: Current rankings, Elo ratings, surface-specific performance
 - **Comparative Analysis**: Differential features between players
 
+## Feature Correlation Analysis
+![Correlation Matrix](images/Correlation%20Matrix.png)
+
 ## 🛠️ Tech Stack
 
 **Backend:**
