@@ -17,9 +17,9 @@ Our system uses three different machine learning models, with CatBoost as the de
 
 | Model | Accuracy | ROC AUC | Log Loss |
 |-------|----------|---------|----------|
-| **CatBoost** (Default) | 67.21% | 0.73 | 0.602911 |
-| XGBoost | 66.70% | 0.73 | 0.606016 |
-| Random Forest | 65.70% | 0.72 | 0.615112 |
+| **CatBoost** (Default) | 67.21% | 0.73 | 0.60     |
+| XGBoost | 66.70% | 0.73 | 0.61     |
+| Random Forest | 65.70% | 0.72 | 0.62     |
 
 ## 📊 Feature Engineering
 
