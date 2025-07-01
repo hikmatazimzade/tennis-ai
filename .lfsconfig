@@ -1,0 +1,9 @@
+[lfs]
+    # Only download these two specific files by default
+    fetchinclude = models/atp_matches_final_boosting_model.csv,models/catboost_model.cbm
+
+    # Skip download errors to allow operations with missing files
+    skipdownloaderrors = true
+
+    # Optimize transfer performance
+    concurrenttransfers = 3
