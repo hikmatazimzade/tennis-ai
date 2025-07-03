@@ -62,12 +62,31 @@ The models are trained on 137 carefully engineered features including:
 
 ## 🚀 Getting Started
 
+### Prerequisites
+
+This project uses Git LFS (Large File Storage) for dataset files. You'll need to install and configure Git LFS:
+
+```bash
+# Install Git LFS (if not already installed)
+# On macOS with Homebrew:
+brew install git-lfs
+
+# On Ubuntu/Debian:
+sudo apt-get install git-lfs
+
+# On Windows, download from: https://git-lfs.github.io/
+
+# Initialize Git LFS
+git lfs install
+```
+
 ### Option 1: Docker (Recommended)
 
-1. **Clone the repository**
+1. **Clone the repository and pull LFS files**
    ```bash
    git clone https://github.com/hikmatazimzade/tennis-ai.git
    cd tennis-ai
+   git lfs pull
    ```
 
 2. **Run with Docker Compose**
@@ -82,10 +101,11 @@ The models are trained on 137 carefully engineered features including:
 
 ### Option 2: Local Development
 
-1. **Clone the repository**
+1. **Clone the repository and pull LFS files**
    ```bash
    git clone https://github.com/hikmatazimzade/tennis-ai.git
    cd tennis-ai
+   git lfs pull
    ```
 
 2. **Backend Setup**
