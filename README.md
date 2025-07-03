@@ -35,6 +35,8 @@ The models are trained on 137 carefully engineered features including:
 - **Ranking & Elo**: Current rankings, Elo ratings, surface-specific performance
 - **Comparative Analysis**: Differential features between players
 
+**Dataset Coverage**: All training data includes tennis matches through 2024 (including the complete 2024 season).
+
 ## Feature Correlation Analysis
 ![Correlation Matrix](images/Correlation%20Matrix.png)
 
